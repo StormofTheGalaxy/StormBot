@@ -32,6 +32,7 @@ import de.presti.ree6.sql.entities.Setting;
 import de.presti.ree6.sql.entities.TwitchIntegration;
 import de.presti.ree6.sql.entities.stats.ChannelStats;
 import de.presti.ree6.sql.entities.stats.Statistics;
+import de.presti.ree6.sql.util.SQLConfig;
 import de.presti.ree6.sql.util.SettingsManager;
 import de.presti.ree6.utils.apis.ChatGPTAPI;
 import de.presti.ree6.utils.apis.Notifier;
@@ -204,15 +205,19 @@ public class Main {
         }
 
         try {
-            new SQLSession(getInstance().getConfig().getConfiguration().getString("hikari.sql.user"),
-                    getInstance().getConfig().getConfiguration().getString("hikari.sql.db"),
-                    getInstance().getConfig().getConfiguration().getString("hikari.sql.pw"),
-                    getInstance().getConfig().getConfiguration().getString("hikari.sql.host"),
-                    getInstance().getConfig().getConfiguration().getInt("hikari.sql.port"),
-                    getInstance().getConfig().getConfiguration().getString("hikari.misc.storageFile"), databaseTyp,
-                    getInstance().getConfig().getConfiguration().getInt("hikari.misc.poolSize"),
-                    getInstance().getConfig().getConfiguration().getBoolean("hikari.misc.createEmbeddedServer"),
-                    BotConfig.isDebug());
+            SQLConfig sqlConfig = SQLConfig.builder()
+                    .username(getInstance().getConfig().getConfiguration().getString("hikari.sql.user"))
+                    .database(getInstance().getConfig().getConfiguration().getString("hikari.sql.db"))
+                    .password(getInstance().getConfig().getConfiguration().getString("hikari.sql.pw"))
+                    .host(getInstance().getConfig().getConfiguration().getString("hikari.sql.host"))
+                    .port(getInstance().getConfig().getConfiguration().getInt("hikari.sql.port"))
+                    .path(getInstance().getConfig().getConfiguration().getString("hikari.misc.storageFile"))
+                    .typ(databaseTyp)
+                    .poolSize(getInstance().getConfig().getConfiguration().getInt("hikari.misc.poolSize", 1))
+                    .createEmbeddedServer(getInstance().getConfig().getConfiguration().getBoolean("hikari.misc.createEmbeddedServer"))
+                    .debug(BotConfig.isDebug()).build();
+
+            new SQLSession(sqlConfig);
         } catch (Exception exception) {
             log.error("Shutting down, because of an critical error!", exception);
             System.exit(0);

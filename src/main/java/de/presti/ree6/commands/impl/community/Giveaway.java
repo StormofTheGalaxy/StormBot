@@ -88,8 +88,8 @@ public class Giveaway implements ICommand {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setTitle(prize);
 
-                embedBuilder.setDescription("Ending: <t:" + endInstant.getEpochSecond() + ":R>\n" +
-                        "Hosted by: " + commandEvent.getMember().getAsMention() + "\n");
+                embedBuilder.setDescription("Заканчивается: <t:" + endInstant.getEpochSecond() + ":R>\n" +
+                        "Создан: " + commandEvent.getMember().getAsMention() + "\n");
 
                 commandEvent.getChannel().sendMessageEmbeds(embedBuilder.build()).queue(message -> {
                     message.addReaction(Emoji.fromUnicode("U+1F389")).queue();
@@ -299,11 +299,11 @@ public class Giveaway implements ICommand {
     @Override
     public CommandData getCommandData() {
         return new CommandDataImpl("giveaway", LanguageService.getDefault("command.description.giveaway"))
-                .addSubcommands(new SubcommandData("create", "Create a Giveaway.")
+                .addSubcommands(new SubcommandData("create", "Создать розыгрыш.")
                                 .addOption(OptionType.STRING, "prize", "The Prize of the Giveaway.", true)
                                 .addOption(OptionType.INTEGER, "winners", "The amount of winners.", true)
                                 .addOption(OptionType.STRING, "duration", "The duration of the Giveaway.", true),
-                        new SubcommandData("end", "End a Giveaway.")
+                        new SubcommandData("end", "Закончить розыгрыш.")
                                 .addOption(OptionType.STRING, "id", "The Message ID of the Giveaway.", true),
                         new SubcommandData("reroll", "Reroll a Giveaway.")
                                 .addOption(OptionType.STRING, "id", "The Message ID of the Giveaway.", true)
