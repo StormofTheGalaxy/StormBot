@@ -28,7 +28,7 @@ import java.time.Instant;
 /**
  * A command to mute a user.
  */
-@Command(name = "report", description = "Отправляет отчёт о работе на вебхук", category = Category.MOD)
+@Command(name = "report", description = "command.description.report", category = Category.MOD)
 public class Report implements ICommand {
 
     /**
@@ -57,19 +57,20 @@ public class Report implements ICommand {
                 }
 
             } else {
-                if (commandEvent.getArguments().length <= 2 && commandEvent.getArguments().length <= 3) {
+                if (commandEvent.getArguments().length == 4) {
+                    assert commandEvent.getMessage() != null;
                     if (commandEvent.getMessage().getMentions().getMembers().isEmpty()) {
                         commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                         commandEvent.reply(commandEvent.getResource("message.default.usage","report @user"), 5);
                     } else {
                         String reason = commandEvent.getArguments()[1];
-                        String rule = commandEvent.getArguments().length == 3 ? commandEvent.getArguments()[2] : "";
-                        String proof = commandEvent.getArguments().length == 4 ? commandEvent.getArguments()[3] : "";
+                        String rule = commandEvent.getArguments()[2];
+                        String proof = commandEvent.getArguments()[3];
                         sendModWebhook(commandEvent, reason, rule, proof);
                     }
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
-                    commandEvent.reply(commandEvent.getResource("message.default.usage","mute @user"), 5);
+                    commandEvent.reply(commandEvent.getResource("message.default.usage","report @user reason rule proof"), 5);
                 }
             }
 
@@ -122,6 +123,6 @@ public class Report implements ICommand {
         Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getModWebhook(commandEvent.getGuild().getId());
         WebhookUtil.sendWebhook(null, wm.build(), Long.parseLong(webhook.getWebhookId()), webhook.getToken(), false);
 
-        commandEvent.reply("Ваш отчёт успешно записан!");
+        commandEvent.reply("Ваш отчёт успешно записан!", 5);
     }
 }
