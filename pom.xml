@@ -5,11 +5,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Ree6</name>
+    <name>Storm</name>
     <description>Ree6 is an open-Source Discord Bot.</description>
 
     <groupId>de.presti</groupId>
-    <artifactId>Ree6</artifactId>
+    <artifactId>Storm</artifactId>
     <version>3.0.19</version>
     <packaging>jar</packaging>
 
@@ -154,9 +154,9 @@
 
         <!-- Database -->
         <dependency>
-            <groupId>de.ree6</groupId>
-            <artifactId>Ree6-SQL</artifactId>
-            <version>982f71d8ad</version>
+            <groupId>com.github.gru2007</groupId>
+            <artifactId>Storm-SQL</artifactId>
+            <version>works-SNAPSHOT</version>
         </dependency>
 
         <!-- Logging -->
