@@ -365,14 +365,14 @@ public class OtherEvents extends ListenerAdapter {
             return;
         }
 
+        if (event.getMember().getUser().isBot()) return;
+
         if (event instanceof GuildVoiceGuildDeafenEvent guildDeafenEvent) {
             if (event.getMember() == event.getGuild().getSelfMember() &&
                     !guildDeafenEvent.isGuildDeafened()) {
                 event.getGuild().getSelfMember().deafen(true).queue();
             }
         }
-
-        if (event.getMember().getUser().isBot()) return;
 
         GuildVoiceState voiceState = event.getVoiceState();
 
