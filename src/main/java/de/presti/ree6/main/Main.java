@@ -166,20 +166,24 @@ public class Main {
 
         ArrayUtil.temporalVoicechannel.addAll(getInstance().getConfig().getTemporal().getStringList("temporalvoice"));
 
-        log.info("Creating Sentry Instance.");
+        if (BotConfig.shouldUseSentry()) {
+            log.info("Creating Sentry Instance.");
 
-        // Create a Sentry Instance to send Exception to an external Service for bug fixing.
-        Sentry.init(options -> {
-            String dsn = getInstance().getConfig().getConfiguration().getString("sentry.dsn");
-            options.setDsn((dsn == null || dsn.equalsIgnoreCase("yourSentryDSNHere")) ? "" : dsn);
-            // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-            // We recommend adjusting this value in production.
-            options.setTracesSampleRate(1.0);
-            // When first trying Sentry it's good to see what the SDK is doing:
-            options.setRelease(BotWorker.getBuild());
-        });
+            // Create a Sentry Instance to send Exception to an external Service for bug fixing.
+            Sentry.init(options -> {
+                String dsn = getInstance().getConfig().getConfiguration().getString("sentry.dsn");
+                options.setDsn((dsn == null || dsn.equalsIgnoreCase("yourSentryDSNHere")) ? "" : dsn);
 
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Sentry.captureException(e));
+                // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+                // We recommend adjusting this value in production.
+                options.setTracesSampleRate(1.0);
+
+                // When first trying Sentry, it's good to see what the SDK is doing:
+                options.setRelease(BotWorker.getBuild());
+            });
+
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> Sentry.captureException(e));
+        }
 
         log.info("Starting preparations of the Bot...");
 
@@ -215,7 +219,8 @@ public class Main {
                     .typ(databaseTyp)
                     .poolSize(getInstance().getConfig().getConfiguration().getInt("hikari.misc.poolSize", 1))
                     .createEmbeddedServer(getInstance().getConfig().getConfiguration().getBoolean("hikari.misc.createEmbeddedServer"))
-                    .debug(BotConfig.isDebug()).build();
+                    .debug(BotConfig.isDebug())
+                    .sentry(BotConfig.shouldUseSentry()).build();
 
             new SQLSession(sqlConfig);
         } catch (Exception exception) {

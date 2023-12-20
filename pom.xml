@@ -158,12 +158,6 @@
             <artifactId>Ree6-SQL</artifactId>
             <version>982f71d8ad</version>
         </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-mysql</artifactId>
-            <version>10.2.0</version>
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- Logging -->
         <dependency>
