@@ -54,7 +54,7 @@ public class Record implements ICommand {
         if (voiceState != null &&
                 voiceState.inAudioChannel() &&
                 voiceState.getChannel() != null &&
-                voiceState.getChannel().getType() == ChannelType.VOICE &&
+                (voiceState.getChannel().getType() == ChannelType.VOICE || voiceState.getChannel().getType() == ChannelType.STAGE) &&
                 voiceState.getChannel() instanceof VoiceChannel voiceChannel) {
             AudioManager audioManager = commandEvent.getGuild().getAudioManager();
             audioManager.openAudioConnection(voiceChannel);
