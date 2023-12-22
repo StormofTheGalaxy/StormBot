@@ -107,9 +107,11 @@ public class Report implements ICommand {
         wm.setAvatarUrl(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
         wm.setUsername(BotConfig.getBotName() + "-Moders");
 
+        String lastReport = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "data_last_report").getStringValue();
+
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
         we.setColor(Color.BLACK.getRGB());
-        we.setTitle(new WebhookEmbed.EmbedTitle("**__Отчёт__**", null));
+        we.setTitle(new WebhookEmbed.EmbedTitle("**__Отчёт №"+lastReport+"__**", null));
         we.setAuthor(new WebhookEmbed.EmbedAuthor(commandEvent.getUser().getEffectiveName(), commandEvent.getUser().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl()));
         we.setTimestamp(Instant.now());
@@ -122,6 +124,7 @@ public class Report implements ICommand {
 
         Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getModWebhook(commandEvent.getGuild().getId());
         WebhookUtil.sendWebhook(null, wm.build(), Long.parseLong(webhook.getWebhookId()), webhook.getToken(), false);
+        SQLSession.getSqlConnector().getSqlWorker().setSetting(commandEvent.getGuild().getId(), "data_last_report", "Last Report", Integer.parseInt(lastReport)+1);
 
         commandEvent.reply("Ваш отчёт успешно записан!", 5);
     }
