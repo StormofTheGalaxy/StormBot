@@ -167,6 +167,17 @@ public class LoggingEvents extends ListenerAdapter {
 
         wm.addEmbeds(we.build());
 
+        List<Setting> BanServers = SQLSession.getSqlConnector().getSqlWorker().getBanFollowers(event.getGuild().getId());
+
+        if (!BanServers.isEmpty()) {
+            BanServers.forEach(followerId -> {
+                try {
+                    event.getJDA().getGuildById(followerId.getGuildId()).unban(event.getUser()).reason("Synced from "+event.getGuild().getName()).queue();
+                } catch (Exception ignore) {
+                }
+            });
+        }
+
         Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getLogWebhook(event.getGuild().getId());
         Main.getInstance().getLoggerQueue().add(new LogMessageUser(Long.parseLong(webhook.getWebhookId()), webhook.getToken(), wm.build(), event.getGuild(), LogTyp.USER_UNBAN, event.getUser()));
     }
