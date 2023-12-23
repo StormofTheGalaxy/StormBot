@@ -3,6 +3,7 @@ package de.presti.ree6.events;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import de.presti.ree6.commands.impl.mod.Ban;
 import de.presti.ree6.language.LanguageService;
 import de.presti.ree6.logger.events.LogMessage;
 import de.presti.ree6.logger.events.LogTyp;
@@ -15,6 +16,7 @@ import de.presti.ree6.logger.invite.InviteContainerManager;
 import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.Invite;
+import de.presti.ree6.sql.entities.Setting;
 import de.presti.ree6.sql.entities.webhook.Webhook;
 import de.presti.ree6.utils.data.ArrayUtil;
 import de.presti.ree6.bot.BotConfig;
@@ -55,7 +57,10 @@ import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Event Handler for all Events related to Logs.
@@ -116,6 +121,17 @@ public class LoggingEvents extends ListenerAdapter {
         if (entry != null && entry.getUser() != null) we.addField(new WebhookEmbed.EmbedField(true, "**" + LanguageService.getByEvent(event, "label.actor") + "**", entry.getUser().getAsMention()));
 
         wm.addEmbeds(we.build());
+
+        List<Setting> BanServers = SQLSession.getSqlConnector().getSqlWorker().getBanFollowers(event.getGuild().getId());
+
+        if (!BanServers.isEmpty()) {
+            BanServers.forEach(followerId -> {
+                try {
+                    event.getJDA().getGuildById(followerId.getGuildId()).ban(event.getUser(), 0, TimeUnit.DAYS).reason("Synced from "+event.getGuild().getName()).queue();
+                } catch (Exception ignore) {
+                }
+            });
+        }
 
         Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getLogWebhook(event.getGuild().getId());
         Main.getInstance().getLoggerQueue().add(new LogMessageUser(Long.parseLong(webhook.getWebhookId()), webhook.getToken(), wm.build(), event.getGuild(), LogTyp.USER_BAN, event.getUser()));
