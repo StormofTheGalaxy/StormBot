@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.audio.AudioReceiveHandler;
 import net.dv8tion.jda.api.audio.CombinedAudio;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
@@ -90,8 +91,12 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
                 return null;
             }).queue();
         }
+        MessageEmbed.Field field = SQLSession.getSqlConnector().getSqlWorker().getSetting(audioChannelUnion.getGuild().getId(), "configuration_moder_records").getBooleanValue() ?
+                new MessageEmbed.Field("❗Внимание", "Модерация тоже сможет скачать вашу запись", false) :
+                new MessageEmbed.Field("", "", false);
         message = audioChannelUnion.asGuildMessageChannel().sendMessageEmbeds(new EmbedBuilder()
                 .setDescription(LanguageService.getByGuild(member.getGuild(), "message.recording.started"))
+                .addField(field)
                 .setColor(Color.YELLOW)
                 .setFooter("Requested by " + member.getEffectiveName() + " - " + BotConfig.getAdvertisement(), member.getEffectiveAvatarUrl())
                 .setTitle(LanguageService.getByGuild(member.getGuild(), "label.recording.start"))
@@ -192,8 +197,12 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
             }
 
             if (canTalk) {
+                MessageEmbed.Field field = SQLSession.getSqlConnector().getSqlWorker().getSetting(audioChannelUnion.getGuild().getId(), "configuration_moder_records").getBooleanValue() ?
+                        new MessageEmbed.Field("❗Внимание", "Модерация тоже сможет скачать вашу запись", false) :
+                        new MessageEmbed.Field("", "", false);
                 message.editMessageEmbeds(new EmbedBuilder()
                         .setDescription(LanguageService.getByGuild(audioChannelUnion.getGuild(), "message.recording.stopped"))
+                        .addField(field)
                         .setColor(Color.GREEN)
                         .setFooter(BotConfig.getAdvertisement(), audioChannelUnion.getGuild().getIconUrl())
                         .setTitle(LanguageService.getByGuild(audioChannelUnion.getGuild(), "label.recording.finished"))
