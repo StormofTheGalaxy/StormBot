@@ -47,19 +47,19 @@ public class Rules implements ICommand {
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Глава 1 Правила дискорд ников")
                     .setFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl())
-                    .setColor(Color.cyan)
+                    .setColor(Color.decode("#4b77dd"))
                     .setDescription(messageContent1);
 
             EmbedBuilder embedBuilder2 = new EmbedBuilder()
                     .setTitle("Глава 2 Правила каналов")
                     .setFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl())
-                    .setColor(Color.cyan)
+                    .setColor(Color.decode("#4b77dd"))
                     .setDescription(messageContent2);
 
             EmbedBuilder embedBuilder3 = new EmbedBuilder()
                     .setTitle("Глава 3 Общий перечень правил")
                     .setFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl())
-                    .setColor(Color.cyan)
+                    .setColor(Color.decode("#4b77dd"))
                     .setDescription(messageContent3);
 
 
@@ -68,7 +68,7 @@ public class Rules implements ICommand {
             optionList.add(SelectOption.of("Адинистрация", "admin"));
             optionList.add(SelectOption.of("Прочее", "other"));
 
-            SelectMenu selectMenu = new StringSelectMenuImpl("setupActionMenu", "Примечания", 1, 1, false, optionList);
+            SelectMenu selectMenu = new StringSelectMenuImpl("rulesMenu", "Дополнительно", 1, 1, false, optionList);
 
             if (commandEvent.isSlashCommand()) {
                 commandEvent.getChannel().sendMessageEmbeds(embedBuilder.build(),embedBuilder2.build(),embedBuilder3.build())

@@ -871,6 +871,56 @@ public class MenuEvents extends ListenerAdapter {
             return;
 
         switch (event.getInteraction().getComponent().getId()) {
+
+            case "rulesMenu" -> {
+
+                EmbedBuilder embedBuilder = new EmbedBuilder(event.getMessage().getEmbeds().get(0));
+
+                java.util.List<SelectOption> optionList = new ArrayList<>();
+
+                switch (event.getInteraction().getValues().get(0)) {
+
+                    case "child" -> {
+                        String messageContent1 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_child")
+                                .getStringValue();
+
+                        EmbedBuilder embedBuilder1 = new EmbedBuilder()
+                                .setTitle("Дочерние дискорды")
+                                .setFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl())
+                                .setColor(Color.decode("#4b77dd"))
+                                .setDescription(messageContent1);
+                        event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
+                    }
+                    case "admin" -> {
+                        String messageContent2 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_admin")
+                                .getStringValue();
+
+                        EmbedBuilder embedBuilder1 = new EmbedBuilder()
+                                .setTitle("Административные каналы")
+                                .setFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl())
+                                .setColor(Color.decode("#4b77dd"))
+                                .setDescription(messageContent2);
+                        event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
+                    }
+                    case "other" -> {
+                        String messageContent3 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_other")
+                                .getStringValue();
+
+                        EmbedBuilder embedBuilder1 = new EmbedBuilder()
+                                .setTitle("Примечание")
+                                .setFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl())
+                                .setColor(Color.decode("#4b77dd"))
+                                .setDescription(messageContent3);
+                        event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
+                    }
+
+                    default -> {
+                        embedBuilder.setDescription(LanguageService.getByGuild(event.getGuild(), "message.default.invalidOption"));
+                        event.editMessageEmbeds(embedBuilder.build()).queue();
+                    }
+                }
+            }
+
             case "setupActionMenu" -> {
 
                 if (checkPerms(event.getMember(), event.getChannel())) {
@@ -976,40 +1026,6 @@ public class MenuEvents extends ListenerAdapter {
                         embedBuilder.setDescription(LanguageService.getByGuild(event.getGuild(), "message.ticket.setup"));
 
                         event.editMessageEmbeds(embedBuilder.build()).setActionRow(new StringSelectMenuImpl("setupTicketsMenu", LanguageService.getByGuild(event.getGuild(), "message.default.actionRequired"), 1, 1, false, optionList)).queue();
-                    }
-
-                    case "child" -> {
-                        String messageContent1 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_child")
-                                .getStringValue();
-
-                        EmbedBuilder embedBuilder1 = new EmbedBuilder()
-                                .setTitle("Дочерние дискорды")
-                                .setFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl())
-                                .setColor(Color.cyan)
-                                .setDescription(messageContent1);
-                        event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
-                    }
-                    case "admin" -> {
-                        String messageContent2 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_admin")
-                                .getStringValue();
-
-                        EmbedBuilder embedBuilder1 = new EmbedBuilder()
-                                .setTitle("Административные каналы")
-                                .setFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl())
-                                .setColor(Color.cyan)
-                                .setDescription(messageContent2);
-                        event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
-                    }
-                    case "other" -> {
-                        String messageContent3 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_other")
-                                .getStringValue();
-
-                        EmbedBuilder embedBuilder1 = new EmbedBuilder()
-                                .setTitle("Примечание")
-                                .setFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl())
-                                .setColor(Color.cyan)
-                                .setDescription(messageContent3);
-                        event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
                     }
 
                     default -> {
