@@ -461,7 +461,7 @@ public class OtherEvents extends ListenerAdapter {
                 if (ModerationUtil.shouldModerate(event.getGuild().getId())) {
                     if (ModerationUtil.checkMessage(event.getGuild().getId(), event.getMessage().getContentRaw())) {
                         Main.getInstance().getCommandManager().deleteMessage(event.getMessage(), null);
-                        Main.getInstance().getCommandManager().sendMessage(LanguageService.getByGuild(event.getGuild(), "message.blacklisted"), event.getChannel(), null);
+                        //Main.getInstance().getCommandManager().sendMessage(LanguageService.getByGuild(event.getGuild(), "message.blacklisted"), event.getChannel(), null);
                         return;
                     }
                 }

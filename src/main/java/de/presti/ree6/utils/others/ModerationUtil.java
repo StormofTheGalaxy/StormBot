@@ -1,11 +1,17 @@
 package de.presti.ree6.utils.others;
 
+import de.presti.ree6.bot.BotWorker;
+import de.presti.ree6.bot.version.BotState;
+import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.bot.BotConfig;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.automod.AutoModResponse;
+import net.dv8tion.jda.api.entities.automod.build.AutoModRuleData;
+import net.dv8tion.jda.api.entities.automod.build.TriggerConfig;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Class to handle the moderation user behaviour.
@@ -39,6 +45,20 @@ public class ModerationUtil {
      * @return true, if there is a blacklisted for contained.
      */
     public static boolean checkMessage(String guildId, String message) {
+        if (7 <= new Random().nextInt(10))
+            try {
+                Guild guild = BotWorker.getShardManager().getGuildById(guildId);
+                assert guild != null;
+                String botid = guild.getJDA().getSelfUser().getId();
+                TriggerConfig config = TriggerConfig.keywordFilter(getBlacklist(guildId));
+                AutoModRuleData data = AutoModRuleData.onMessage("Blacklist from Web", config);
+                data.putResponses(AutoModResponse.blockMessage(), AutoModResponse.sendAlert((GuildMessageChannel) BotWorker.getShardManager().getGuildById(guildId).getGuildChannelById(SQLSession.getSqlConnector().getSqlWorker().getLogWebhook(guildId).getChannelId())));
+                if (guild.retrieveAutoModRules().complete().stream().anyMatch(rule -> rule.getCreatorId().equals(botid)))
+                    guild.modifyAutoModRuleById(guild.retrieveAutoModRules().complete().stream().filter(rule -> rule.getCreatorId().equals(botid)).findFirst().get().getId()).setResponses(AutoModResponse.blockMessage(), AutoModResponse.sendAlert((GuildMessageChannel) BotWorker.getShardManager().getGuildById(guildId).getGuildChannelById(SQLSession.getSqlConnector().getSqlWorker().getLogWebhook(guildId).getChannelId()))).setTriggerConfig(config).queue();
+                else
+                    guild.createAutoModRule(data).queue();
+            } catch (Exception ignore) { }
+
         return Arrays.stream(message.toLowerCase().split(" ")).anyMatch(word -> checkBlacklist(guildId, word));
     }
 
