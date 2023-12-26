@@ -45,8 +45,7 @@ public class ModerationUtil {
      * @return true, if there is a blacklisted for contained.
      */
     public static boolean checkMessage(String guildId, String message) {
-        if (7 <= new Random().nextInt(10))
-            try {
+        if (true) {
                 Guild guild = BotWorker.getShardManager().getGuildById(guildId);
                 assert guild != null;
                 String botid = guild.getJDA().getSelfUser().getId();
@@ -57,7 +56,7 @@ public class ModerationUtil {
                     guild.modifyAutoModRuleById(guild.retrieveAutoModRules().complete().stream().filter(rule -> rule.getCreatorId().equals(botid)).findFirst().get().getId()).setResponses(AutoModResponse.blockMessage(), AutoModResponse.sendAlert((GuildMessageChannel) BotWorker.getShardManager().getGuildById(guildId).getGuildChannelById(SQLSession.getSqlConnector().getSqlWorker().getLogWebhook(guildId).getChannelId()))).setTriggerConfig(config).queue();
                 else
                     guild.createAutoModRule(data).queue();
-            } catch (Exception ignore) { }
+            }
 
         return Arrays.stream(message.toLowerCase().split(" ")).anyMatch(word -> checkBlacklist(guildId, word));
     }
