@@ -65,7 +65,7 @@ public class Rules implements ICommand {
 
             List<SelectOption> optionList = new ArrayList<>();
             optionList.add(SelectOption.of("Дочерние дискорды", "child"));
-            optionList.add(SelectOption.of("Адинистрация", "admin"));
+            optionList.add(SelectOption.of("Администрация", "admin"));
             optionList.add(SelectOption.of("Прочее", "other"));
 
             SelectMenu selectMenu = new StringSelectMenuImpl("rulesMenu", "Дополнительно", 1, 1, false, optionList);
