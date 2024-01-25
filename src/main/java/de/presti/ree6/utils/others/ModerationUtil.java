@@ -33,7 +33,7 @@ public class ModerationUtil {
      * @param guildId the ID of the Guild.
      * @return an {@link ArrayList} with every Blacklisted word from the Guild.
      */
-    public static List<String> getBlacklist(String guildId) {
+    public static List<String> getBlacklist(long guildId) {
         return SQLSession.getSqlConnector().getSqlWorker().getChatProtectorWords(guildId);
     }
 
@@ -44,7 +44,7 @@ public class ModerationUtil {
      * @param message the Message-Content.
      * @return true, if there is a blacklisted for contained.
      */
-    public static boolean checkMessage(String guildId, String message) {
+    public static boolean checkMessage(long guildId, String message) {
         if (true) {
                 Guild guild = BotWorker.getShardManager().getGuildById(guildId);
                 assert guild != null;
@@ -68,7 +68,7 @@ public class ModerationUtil {
      * @param word    the word to check.
      * @return true, if there is a blacklisted for contained.
      */
-    public static boolean checkBlacklist(String guildId, String word) {
+    public static boolean checkBlacklist(long guildId, String word) {
         return SQLSession.getSqlConnector().getSqlWorker().isChatProtectorSetup(guildId, word);
     }
 
@@ -78,7 +78,7 @@ public class ModerationUtil {
      * @param guildId the ID of the Guild.
      * @return true, if the Server should be moderated.
      */
-    public static boolean shouldModerate(String guildId) {
+    public static boolean shouldModerate(long guildId) {
         return BotConfig.isModuleActive("moderation") && SQLSession.getSqlConnector().getSqlWorker().isChatProtectorSetup(guildId);
     }
 
@@ -88,7 +88,7 @@ public class ModerationUtil {
      * @param guildId the ID of the Guild.
      * @param word    the Word you want to blacklist.
      */
-    public static void blacklist(String guildId, String word) {
+    public static void blacklist(long guildId, String word) {
         if (!checkBlacklist(guildId, word)) {
             SQLSession.getSqlConnector().getSqlWorker().addChatProtectorWord(guildId, word);
         }
@@ -100,7 +100,7 @@ public class ModerationUtil {
      * @param guildId  the ID of the Guild.
      * @param wordList the List of Words, which should be blacklisted.
      */
-    public static void blacklist(String guildId, List<String> wordList) {
+    public static void blacklist(long guildId, List<String> wordList) {
         wordList.forEach(word -> blacklist(guildId, word));
     }
 
@@ -110,7 +110,7 @@ public class ModerationUtil {
      * @param guildId the ID of the Guild.
      * @param word    the Word that should be removed from the Blacklist.
      */
-    public static void removeBlacklist(String guildId, String word) {
+    public static void removeBlacklist(long guildId, String word) {
         SQLSession.getSqlConnector().getSqlWorker().removeChatProtectorWord(guildId, word);
     }
 
@@ -120,7 +120,7 @@ public class ModerationUtil {
      * @param guildId  the ID of the Guild.
      * @param wordList the List of Words that should be removed from the Blacklist.
      */
-    public static void removeBlacklist(String guildId, List<String> wordList) {
+    public static void removeBlacklist(long guildId, List<String> wordList) {
         wordList.forEach(word -> removeBlacklist(guildId, word));
     }
 }

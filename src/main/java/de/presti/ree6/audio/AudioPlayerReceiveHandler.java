@@ -47,14 +47,14 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
     private final Queue<byte[]> queue = new ConcurrentLinkedQueue<>();
 
     /**
-     * Boolean used to indicated that handler finished his Job.
+     * Boolean used to indicate that the handler finished his Job.
      */
     private boolean finished = false;
 
     /**
      * The ID of the User who wanted to start the recording.
      */
-    String creatorId;
+    long creatorId;
 
     /**
      * The voice channel this handler is currently handling.
@@ -67,7 +67,7 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
     List<String> participants = new ArrayList<>();
 
     /**
-     * The first send message which should be edited.
+     * The first sent message which should be edited.
      */
     Message message;
 
@@ -78,7 +78,7 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
      * @param audioChannelUnion The voice channel this handler should handle.
      */
     public AudioPlayerReceiveHandler(Member member, AudioChannelUnion audioChannelUnion) {
-        this.creatorId = member.getId();
+        this.creatorId = member.getIdLong();
         this.audioChannelUnion = audioChannelUnion;
         if (audioChannelUnion.getGuild().getSelfMember().hasPermission(Permission.NICKNAME_CHANGE)) {
             audioChannelUnion.getGuild().getSelfMember().modifyNickname(LanguageService.getByGuild(member.getGuild(), "label.recording.name")).reason(LanguageService.getByGuild(member.getGuild(), "message.recording.startReason", member.getUser().getName())).onErrorMap(throwable -> {
@@ -98,9 +98,15 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
                 .setDescription(LanguageService.getByGuild(member.getGuild(), "message.recording.started"))
                 .addField(field)
                 .setColor(Color.YELLOW)
-                .setFooter("Requested by " + member.getEffectiveName() + " - " + BotConfig.getAdvertisement(), member.getEffectiveAvatarUrl())
+                .setFooter(LanguageService.getByGuild(member.getGuild(),"label.footerMessage", member.getEffectiveName(), BotConfig.getAdvertisement()), member.getEffectiveAvatarUrl())
                 .setTitle(LanguageService.getByGuild(member.getGuild(), "label.recording.start"))
                 .build()).complete();
+
+        if (audioChannelUnion.getGuild().getSelfMember().hasPermission(Permission.VOICE_SET_STATUS)) {
+            if (audioChannelUnion.getType() == ChannelType.VOICE) {
+                audioChannelUnion.asVoiceChannel().modifyStatus(LanguageService.getByGuild(audioChannelUnion.getGuild(), "label.recording.name")).queue();
+            }
+        }
     }
 
     /**
@@ -108,10 +114,10 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
      */
     @Override // combine multiple user audio-streams into a single one
     public boolean canReceiveCombined() {
-        /* one entry = 20ms of audio, which means 20 * 100 = 2000ms = 2s of audio,
-         * but since we want to allow up to 5 minute of audio we have to do
-         * 20 * 100 * 150 =  300.000ms = 5 minutes of audio.
-         * And since 100 entries are 2s we would need 15000 entries for 5 minutes of audio.
+        /* One entry = 20ms of audio, which means 20 * 100 = 2000ms = 2s of audio,
+         * but since we want to allow up to 5 minutes of audio, we have to do
+         * 20 * 100 * 150 = 300.000ms = 300s = 5 minutes of audio.
+         * And since 100 entries are 2s, we would need 15000 entries for 5 minutes of audio.
          */
         return queue.size() < 15000;
     }
@@ -185,7 +191,7 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
                 byteBuffer.put(data);
             }
 
-            Recording recording = new Recording(audioChannelUnion.getGuild().getId(), audioChannelUnion.getId(), creatorId, AudioUtil.convertPCMtoWAV(byteBuffer),
+            Recording recording = new Recording(audioChannelUnion.getGuild().getIdLong(), audioChannelUnion.getIdLong(), creatorId, AudioUtil.convertPCMtoWAV(byteBuffer),
                     JsonParser.parseString(new Gson().toJson(participants)).getAsJsonArray());
 
             boolean failedToUpload = false;

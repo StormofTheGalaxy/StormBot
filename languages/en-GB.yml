@@ -1,7 +1,7 @@
 language:
   name: "English (UK)"
   locale: "en-GB"
-  version: "3.0.15"
+  version: "3.1.2"
   author: "Presti"
 logging:
   banned: ":airplane_departure: %s **banned.**"
@@ -194,6 +194,8 @@ label:
   musicQuizTitleGuess: "MusicQuiz Title Guess"
   rewards: "Rewards"
   sendToChat: "Send in Chat"
+  avatar: "Avatar"
+  footerMessage: "Requested by %s - %s"
 message:
   default:
     usage: "Usage {guild_prefix}%s."
@@ -693,6 +695,7 @@ command:
     steal: "Steal money from other users!"
     work: "Get your own money from doing work!"
     giveaway: "Manage Giveaways!"
+    avatar: "Get the Avatar of an User!"
 category:
   info: "Used to gather information or provide information."
   moderation: "Moderation Tools that can help you manager Users or prevent rule breaking on the Server."

@@ -1,6 +1,7 @@
 package de.presti.ree6.news;
 
 import de.presti.ree6.bot.BotConfig;
+import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -16,13 +17,13 @@ public class AnnouncementManager {
      * List of all announcements.
      */
     @Getter
-    private static List<Announcement> announcementList = new ArrayList<>();
+    private static final List<Announcement> announcementList = new ArrayList<>();
 
     /**
      * HashMap used to store guild ids and their received announcements.
      */
     @Getter
-    private static HashMap<Long, List<String>> receivedAnnouncements = new HashMap<>();
+    private static final HashMap<Long, List<String>> receivedAnnouncements = new HashMap<>();
 
     /**
      * Method used to add an announcement to the list.

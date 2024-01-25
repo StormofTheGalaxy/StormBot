@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 public class CatImage implements ICommand {
 
     /**
-     * @inheritDoc
+     * @see ICommand#onPerform(CommandEvent)
      */
     @Override
     public void onPerform(CommandEvent commandEvent) {
@@ -30,13 +30,13 @@ public class CatImage implements ICommand {
         em.setTitle(commandEvent.getResource("label.randomCatImage"));
         em.setColor(BotWorker.randomEmbedColor());
         em.setImage(js.get(0).getAsJsonObject().get("url").getAsString());
-        em.setFooter("Requested by " + commandEvent.getMember().getEffectiveName() + " - " + BotConfig.getAdvertisement(), commandEvent.getMember().getEffectiveAvatarUrl());
+        em.setFooter(commandEvent.getResource("label.footerMessage", commandEvent.getMember().getEffectiveName(), BotConfig.getAdvertisement()), commandEvent.getMember().getEffectiveAvatarUrl());
 
         commandEvent.reply(em.build());
     }
 
     /**
-     * @inheritDoc
+     * @see ICommand#getCommandData()
      */
     @Override
     public CommandData getCommandData() {
@@ -44,7 +44,7 @@ public class CatImage implements ICommand {
     }
 
     /**
-     * @inheritDoc
+     * @see ICommand#getAlias()
      */
     @Override
     public String[] getAlias() {

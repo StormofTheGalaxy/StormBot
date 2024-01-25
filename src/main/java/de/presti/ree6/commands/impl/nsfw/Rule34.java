@@ -73,7 +73,12 @@ public class Rule34 implements ICommand {
         if (args.length > 0)
             tags = "&tags=" + URLEncoder.encode(builder.toString(), StandardCharsets.UTF_8).toLowerCase();
 
-        if (tags.contains("loli") || tags.contains("l0li") || tags.contains("lol1") || tags.contains("l0l1")) {
+        String lowerTagTest = tags.toLowerCase().replace("1", "i").replace("0", "o").replace("3", "e").replace("4", "a").replace("5", "s").replace("7", "t");
+
+        if (lowerTagTest.contains("loli") || lowerTagTest.contains("child") || lowerTagTest.contains("children") ||
+                lowerTagTest.contains("kid") || lowerTagTest.contains("underaged") || lowerTagTest.contains("underage") ||
+                lowerTagTest.contains("young") || lowerTagTest.contains("petite") || lowerTagTest.contains("toddler") ||
+                lowerTagTest.contains("todler") || lowerTagTest.contains("baby")) {
             message.editMessage(commandEvent.getResource("message.nsfw.notAllowed")).queue();
             return;
         }

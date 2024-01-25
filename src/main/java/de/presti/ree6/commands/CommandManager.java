@@ -8,6 +8,7 @@ import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.Setting;
 import de.presti.ree6.sql.entities.custom.CustomCommand;
+import de.presti.ree6.sql.util.SettingsManager;
 import de.presti.ree6.utils.data.ArrayUtil;
 import de.presti.ree6.bot.BotConfig;
 import de.presti.ree6.utils.others.ThreadUtil;
@@ -22,6 +23,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
@@ -74,7 +76,8 @@ public class CommandManager {
         for (Class<? extends ICommand> aClass : classes) {
             Command commandAnnotation = aClass.getAnnotation(Command.class);
 
-            if (!BotConfig.isModuleActive(commandAnnotation.category().getDescription().substring(9).toLowerCase())) continue;
+            if (!BotConfig.isModuleActive(commandAnnotation.category().getDescription().substring(9).toLowerCase()))
+                continue;
 
             log.info("Loading Command {}", aClass.getSimpleName());
 
@@ -263,6 +266,14 @@ public class CommandManager {
 
         if (!commands.contains(command)) {
             commands.add(command);
+
+            Command commandAnnotation = command.getClass().getAnnotation(Command.class);
+
+            // Skip the hidden Commands.
+            if (commandAnnotation.category() == Category.HIDDEN) return;
+
+            SettingsManager.getSettings().add(new Setting(-1,
+                    "command_" + commandAnnotation.name().toLowerCase(), commandAnnotation.name(), true));
         }
     }
 
@@ -304,20 +315,20 @@ public class CommandManager {
      * @param guild                        the Guild the Member is from.
      * @param messageContent               the Message content (including the prefix + command name).
      * @param message                      the Message Entity.
-     * @param textChannel                  the TextChannel where the command has been performed.
+     * @param messageChannel               the MessageChannel where the command has been performed.
      * @param slashCommandInteractionEvent the Slash Command Event if it was a Slash Command.
      * @return true, if a command has been performed.
      */
-    public boolean perform(Member member, Guild guild, String messageContent, Message message, MessageChannelUnion textChannel, SlashCommandInteractionEvent slashCommandInteractionEvent) {
+    public boolean perform(Member member, Guild guild, String messageContent, Message message, GuildMessageChannelUnion messageChannel, SlashCommandInteractionEvent slashCommandInteractionEvent) {
         // Check if the User is under Cooldown.
         if (isTimeout(member.getUser())) {
 
             // Check if it is a Slash Command or not.
             if (slashCommandInteractionEvent != null) {
-                sendMessage(LanguageService.getByGuild(guild, "command.perform.cooldown"), 5, textChannel, slashCommandInteractionEvent.getHook().setEphemeral(true));
+                sendMessage(LanguageService.getByGuild(guild, "command.perform.cooldown"), 5, messageChannel, slashCommandInteractionEvent.getHook().setEphemeral(true));
                 deleteMessage(message, slashCommandInteractionEvent.getHook().setEphemeral(true));
-            } else if (messageContent.toLowerCase().startsWith(SQLSession.getSqlConnector().getSqlWorker().getSetting(guild.getId(), "chatprefix").getStringValue().toLowerCase())) {
-                sendMessage(LanguageService.getByGuild(guild, "command.perform.cooldown"), 5, textChannel, null);
+            } else if (messageContent.toLowerCase().startsWith(SQLSession.getSqlConnector().getSqlWorker().getSetting(guild.getIdLong(), "chatprefix").getStringValue().toLowerCase())) {
+                sendMessage(LanguageService.getByGuild(guild, "command.perform.cooldown"), 5, messageChannel, null);
                 deleteMessage(message, null);
             }
 
@@ -328,12 +339,12 @@ public class CommandManager {
         // Check if it is a Slash Command.
         if (slashCommandInteractionEvent != null) {
             if (!BotConfig.isModuleActive("slashcommands")) return false;
-            if (!performSlashCommand(textChannel, slashCommandInteractionEvent)) {
+            if (!performSlashCommand(messageChannel, slashCommandInteractionEvent)) {
                 return false;
             }
         } else {
             if (!BotConfig.isModuleActive("messagecommands")) return false;
-            if (!performMessageCommand(member, guild, messageContent, message, textChannel)) {
+            if (!performMessageCommand(member, guild, messageContent, message, messageChannel)) {
                 return false;
             }
         }
@@ -362,14 +373,14 @@ public class CommandManager {
      * @param textChannel    the TextChannel where the command has been performed.
      * @return true, if a command has been performed.
      */
-    private boolean performMessageCommand(Member member, Guild guild, String messageContent, Message message, MessageChannelUnion textChannel) {
+    private boolean performMessageCommand(Member member, Guild guild, String messageContent, Message message, GuildMessageChannelUnion textChannel) {
         // Check if the Message is null.
         if (message == null) {
             sendMessage(LanguageService.getByGuild(guild, "command.perform.error"), 5, textChannel, null);
             return false;
         }
 
-        String currentPrefix = SQLSession.getSqlConnector().getSqlWorker().getSetting(guild.getId(), "chatprefix").getStringValue().toLowerCase();
+        String currentPrefix = SQLSession.getSqlConnector().getSqlWorker().getSetting(guild.getIdLong(), "chatprefix").getStringValue().toLowerCase();
 
         // Check if the message starts with the prefix.
         if (!messageContent.toLowerCase().startsWith(currentPrefix))
@@ -379,7 +390,7 @@ public class CommandManager {
         messageContent = messageContent.substring(currentPrefix.length());
 
         // Split all Arguments.
-        String[] arguments = messageContent.split(" ");
+        String[] arguments = messageContent.split("\\s+");
 
         if (arguments.length == 0 || arguments[0].isBlank()) {
             sendMessage(LanguageService.getByGuild(guild, "command.perform.missingCommand"), 5, textChannel, null);
@@ -391,12 +402,12 @@ public class CommandManager {
 
         // Check if there is even a Command with that name.
         if (command == null && BotConfig.isModuleActive("customcommands")) {
-            CustomCommand customCommand = SQLSession.getSqlConnector().getSqlWorker().getEntity(new CustomCommand(), "FROM CustomCommand WHERE guildId=:gid AND name=:command", Map.of("gid", guild.getId(), "command", arguments[0].toLowerCase()));
+            CustomCommand customCommand = SQLSession.getSqlConnector().getSqlWorker().getEntity(new CustomCommand(), "FROM CustomCommand WHERE guildId=:gid AND name=:command", Map.of("gid", guild.getIdLong(), "command", arguments[0].toLowerCase()));
             if (customCommand != null) {
-                MessageChannelUnion messageChannelUnion = textChannel;
+                GuildMessageChannelUnion messageChannelUnion = textChannel;
 
                 if (customCommand.getChannelId() != -1) {
-                    messageChannelUnion = guild.getChannelById(MessageChannelUnion.class, customCommand.getChannelId());
+                    messageChannelUnion = guild.getChannelById(GuildMessageChannelUnion.class, customCommand.getChannelId());
                 }
 
                 if (customCommand.getMessageResponse() != null) {
@@ -419,7 +430,7 @@ public class CommandManager {
         }
 
         if (command.getClass().getAnnotation(Command.class).category() != Category.HIDDEN) {
-            Setting blacklistSetting = SQLSession.getSqlConnector().getSqlWorker().getSetting(guild.getId(), "command_" + command.getClass().getAnnotation(Command.class).name().toLowerCase());
+            Setting blacklistSetting = SQLSession.getSqlConnector().getSqlWorker().getSetting(guild.getIdLong(), "command_" + command.getClass().getAnnotation(Command.class).name().toLowerCase());
 
             // Check if the Command is blacklisted.
             if (blacklistSetting != null && !blacklistSetting.getBooleanValue()) {
@@ -440,11 +451,11 @@ public class CommandManager {
     /**
      * Call when a slash command has been performed.
      *
-     * @param textChannel                  the TextChannel where the command has been performed.
+     * @param messageChannel               the {@link GuildMessageChannelUnion} where the command has been performed.
      * @param slashCommandInteractionEvent the Slash-Command Event.
      * @return true, if a command has been performed.
      */
-    private boolean performSlashCommand(MessageChannelUnion textChannel, SlashCommandInteractionEvent slashCommandInteractionEvent) {
+    private boolean performSlashCommand(GuildMessageChannelUnion messageChannel, SlashCommandInteractionEvent slashCommandInteractionEvent) {
         //Get the Command by the Slash Command Name.
         ICommand command = getCommandBySlashName(slashCommandInteractionEvent.getName());
 
@@ -454,14 +465,18 @@ public class CommandManager {
             return false;
         }
 
-        // Check if the command is blocked or not.
-        if (!SQLSession.getSqlConnector().getSqlWorker().getSetting(slashCommandInteractionEvent.getGuild().getId(), "command_" + command.getClass().getAnnotation(Command.class).name().toLowerCase()).getBooleanValue() && command.getClass().getAnnotation(Command.class).category() != Category.HIDDEN) {
-            sendMessage(LanguageService.getByGuild(slashCommandInteractionEvent.getGuild(), "command.perform.blocked"), 5, null, slashCommandInteractionEvent.getHook().setEphemeral(true));
-            return false;
+        if (command.getClass().getAnnotation(Command.class).category() != Category.HIDDEN) {
+            Setting blacklistSetting = SQLSession.getSqlConnector().getSqlWorker().getSetting(slashCommandInteractionEvent.getGuild().getIdLong(), "command_" + command.getClass().getAnnotation(Command.class).name().toLowerCase());
+
+            // Check if the Command is blacklisted.
+            if (blacklistSetting != null && !blacklistSetting.getBooleanValue()) {
+                sendMessage(LanguageService.getByGuild(slashCommandInteractionEvent.getGuild(), "command.perform.blocked"), 5, null, slashCommandInteractionEvent.getHook().setEphemeral(true));
+                return false;
+            }
         }
 
         // Perform the Command.
-        command.onASyncPerform(new CommandEvent(command.getClass().getAnnotation(Command.class).name(), slashCommandInteractionEvent.getMember(), slashCommandInteractionEvent.getGuild(), null, textChannel, null, slashCommandInteractionEvent));
+        command.onASyncPerform(new CommandEvent(command.getClass().getAnnotation(Command.class).name(), slashCommandInteractionEvent.getMember(), slashCommandInteractionEvent.getGuild(), null, messageChannel, null, slashCommandInteractionEvent));
 
         return true;
     }
@@ -650,7 +665,11 @@ public class CommandManager {
      * @param interactionHook the Interaction-hook, if it is a slash event.
      */
     public void deleteMessage(Message message, InteractionHook interactionHook) {
-        if (message != null && message.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE) && message.getChannel().retrieveMessageById(message.getIdLong()).complete() != null && message.getType().canDelete() && !message.isEphemeral() && interactionHook == null) {
+        if (message != null && message.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE) &&
+                message.getChannel().retrieveMessageById(message.getIdLong()).complete() != null &&
+                message.getType().canDelete() &&
+                !message.isEphemeral() &&
+                interactionHook == null) {
             message.delete().onErrorMap(throwable -> {
                 log.error("[CommandManager] Couldn't delete a Message!", throwable);
                 return null;

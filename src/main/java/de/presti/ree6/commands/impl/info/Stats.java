@@ -62,7 +62,8 @@ public class Stats implements ICommand {
         em.addField("**" + commandEvent.getResource("label.users") + "**", String.valueOf(memberCount), true);
 
         em.addField("**" + commandEvent.getResource("label.botStats") + ":**", "", true);
-        em.addField("**" + commandEvent.getResource("label.version") + "**", BotWorker.getBuild() + "-" + BotWorker.getVersion().name().toUpperCase(), true);
+        em.addField("**" + commandEvent.getResource("label.version") + "**", BotWorker.getBuild() + "-" + BotWorker.getVersion().name().toUpperCase()
+                + " [[" + BotWorker.getCommit() + "](https://github.com/Ree6-Applications/Ree6/commit/" + BotWorker.getCommit() + ")]", true);
         em.addField("**" + commandEvent.getResource("label.uptime") + "**", TimeUtil.getTime(BotWorker.getStartTime()), true);
 
         em.addField("**" + commandEvent.getResource("label.discordStats") + ":**", "", true);
@@ -75,7 +76,7 @@ public class Stats implements ICommand {
 
         StringBuilder end = new StringBuilder();
 
-        for (GuildCommandStats values : SQLSession.getSqlConnector().getSqlWorker().getStats(commandEvent.getGuild().getId())) {
+        for (GuildCommandStats values : SQLSession.getSqlConnector().getSqlWorker().getStats(commandEvent.getGuild().getIdLong())) {
             end.append(values.getCommand()).append(" - ").append(values.getUses()).append("\n");
         }
 

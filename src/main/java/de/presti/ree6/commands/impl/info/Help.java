@@ -66,9 +66,11 @@ public class Help implements ICommand {
         em.setThumbnail(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
         em.setFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl());
         if (categoryString == null) {
-            String prefix = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "chatprefix").getStringValue();
+            String prefix = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "chatprefix").getStringValue();
             for (Category cat : Category.values()) {
                 if (cat != Category.HIDDEN) {
+                    if (!BotConfig.isModuleActive(cat.name().toLowerCase())) continue;
+
                     String formattedName = cat.name().toUpperCase().charAt(0) + cat.name().substring(1).toLowerCase();
                     em.addField("**" + formattedName + "**", prefix + "help " + cat.name().toLowerCase(), true);
                 }
@@ -79,7 +81,7 @@ public class Help implements ICommand {
 
                 Category category = getCategoryFromString(categoryString);
 
-                String prefix = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "chatprefix").getStringValue();
+                String prefix = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "chatprefix").getStringValue();
 
                 for (ICommand cmd : Main.getInstance().getCommandManager().getCommands().stream().filter(command -> command.getClass().getAnnotation(Command.class).category() == category).toList()) {
                     end.append("``")

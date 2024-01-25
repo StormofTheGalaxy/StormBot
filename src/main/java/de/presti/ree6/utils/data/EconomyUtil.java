@@ -69,7 +69,7 @@ public class EconomyUtil {
      * @return The MoneyHolder.
      */
     public static MoneyHolder getMoneyHolder(long guildId, long memberId, boolean createIfNotExists) {
-        MoneyHolder moneyHolder = SQLSession.getSqlConnector().getSqlWorker().getEntity(new MoneyHolder(), "FROM MoneyHolder WHERE guildId = :gid AND userId = :uid",
+        MoneyHolder moneyHolder = SQLSession.getSqlConnector().getSqlWorker().getEntity(new MoneyHolder(), "FROM MoneyHolder WHERE guildUserId.guildId = :gid AND guildUserId.userId = :uid",
                 Map.of("gid", guildId, "uid", memberId));
 
         if (moneyHolder == null && createIfNotExists) {
@@ -139,7 +139,7 @@ public class EconomyUtil {
             SQLSession.getSqlConnector().getSqlWorker().updateEntity(sender);
         }
 
-        SQLSession.getSqlConnector().getSqlWorker().updateEntity(new MoneyTransaction(0L, isSystem, isSystem ? receiver.getGuildId(): sender.getGuildId(), receiver, receiver, toBank, fromBank, amount, Timestamp.from(Instant.now())));
+        SQLSession.getSqlConnector().getSqlWorker().updateEntity(new MoneyTransaction(0L, isSystem, isSystem ? receiver.getGuildUserId().getGuildId() : sender.getGuildUserId().getGuildId(), receiver, receiver, toBank, fromBank, amount, Timestamp.from(Instant.now())));
 
         return true;
     }

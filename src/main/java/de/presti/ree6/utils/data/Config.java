@@ -1,6 +1,7 @@
 package de.presti.ree6.utils.data;
 
 import de.presti.ree6.bot.BotWorker;
+import de.presti.ree6.utils.others.VersionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +34,7 @@ public class Config {
     /**
      * The config version.
      */
-    private final String version = "3.0.19";
+    private final String version = "3.1.6";
 
     /**
      * Initialize the Configuration.
@@ -113,7 +114,7 @@ public class Config {
                     .parent().path("poolSize").addDefault(10);
 
             yamlFile.path("bot")
-                    .comment("Discord Application and overall Bot Configuration, used for OAuth, Bot Authentication, and customization.").blankLine()
+                    .comment("Discord Application and overall Bot Configuration, used for OAuth, Bot Authentication and customization.").blankLine()
                     .path("tokens").path("release").addDefault("ReleaseTokenhere").commentSide("Token used when set to release build.")
                     .parent().path("beta").addDefault("BetaTokenhere").commentSide("Token used when set to beta build.")
                     .parent().path("dev").addDefault("DevTokenhere").commentSide("Token used when set to dev build.")
@@ -149,8 +150,13 @@ public class Config {
                     .parent().path("muteGlobal").addDefault(true).commentSide("Should an XP reset be triggered when a user gets muted on the Server?")
                     .parent().path("deafen").addDefault(true).commentSide("Should an XP reset be triggered when a user deafens themselves?")
                     .parent().path("deafenGlobal").addDefault(true).commentSide("Should an XP reset be triggered when a user gets deafened on the Server?")
-                    .parent()
-                    .parent().parent().path("modules").comment("Customize the active modules in Ree6.").blankLine()
+                    .parent().parent().path("rankCard").comment("Customize the rank card in Ree6.").blankLine()
+                    .addDefault("textColor", "#FFFFFF").commentSide("The Color of the Text in the Rank Card.")
+                    .addDefault("highlightColor", "#FF00FF").commentSide("The Color of the Highlights in the Rank Card. (Level and Rank)")
+                    .addDefault("detailColor", "#C0C0C0").commentSide("The Color of the Details in the Rank Card. (XP and Discriminator)")
+                    .addDefault("progressbarColor", "#FF00FF").commentSide("The Color of the Progressbar in the Rank Card.")
+                    .addDefault("progressBarBackgroundColor", "#7C007C").commentSide("The Color of the Background of the Progressbar in the Rank Card.")
+                    .parent().path("modules").comment("Customize the active modules in Ree6.").blankLine()
                     .path("moderation").addDefault(true).commentSide("Enable the moderation module.")
                     .parent().path("music").addDefault(true).commentSide("Enable the music module.")
                     .parent().path("fun").addDefault(true).commentSide("Enable the fun commands.")
@@ -339,23 +345,7 @@ public class Config {
      * @return True if versionA is above versionB.
      */
     public boolean compareVersion(String versionA, String versionB) {
-        if (versionA == null) return false;
-        if (versionB == null) return true;
-
-        String[] split = versionA.split("\\.");
-
-        int mayor = Integer.parseInt(split[0]);
-        int minor = Integer.parseInt(split[1]);
-        int patch = Integer.parseInt(split[2]);
-
-        String[] split2 = versionB.split("\\.");
-        int otherMayor = Integer.parseInt(split2[0]);
-        int otherMinor = Integer.parseInt(split2[1]);
-        int otherPatch = Integer.parseInt(split2[2]);
-
-        if (mayor > otherMayor) return true;
-        if (mayor == otherMayor && minor > otherMinor) return true;
-        return mayor == otherMayor && minor == otherMinor && patch > otherPatch;
+        return VersionUtil.compareVersion(versionA, versionB) != VersionUtil.VersionType.NONE;
     }
 
     /**
