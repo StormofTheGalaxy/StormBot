@@ -91,7 +91,7 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
                 return null;
             }).queue();
         }
-        MessageEmbed.Field field = SQLSession.getSqlConnector().getSqlWorker().getSetting(audioChannelUnion.getGuild().getId(), "configuration_moder_records").getBooleanValue() ?
+        MessageEmbed.Field field = SQLSession.getSqlConnector().getSqlWorker().getSetting(audioChannelUnion.getGuild().getIdLong(), "configuration_moder_records").getBooleanValue() ?
                 new MessageEmbed.Field("❗Внимание", "Модерация тоже сможет скачать вашу запись", false) :
                 new MessageEmbed.Field("", "", false);
         message = audioChannelUnion.asGuildMessageChannel().sendMessageEmbeds(new EmbedBuilder()
@@ -203,7 +203,7 @@ public class AudioPlayerReceiveHandler implements AudioReceiveHandler {
             }
 
             if (canTalk) {
-                MessageEmbed.Field field = SQLSession.getSqlConnector().getSqlWorker().getSetting(audioChannelUnion.getGuild().getId(), "configuration_moder_records").getBooleanValue() ?
+                MessageEmbed.Field field = SQLSession.getSqlConnector().getSqlWorker().getSetting(audioChannelUnion.getGuild().getIdLong(), "configuration_moder_records").getBooleanValue() ?
                         new MessageEmbed.Field("❗Внимание", "Модерация тоже сможет скачать вашу запись", false) :
                         new MessageEmbed.Field("", "", false);
                 message.editMessageEmbeds(new EmbedBuilder()

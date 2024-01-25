@@ -881,7 +881,7 @@ public class MenuEvents extends ListenerAdapter {
                 switch (event.getInteraction().getValues().get(0)) {
 
                     case "child" -> {
-                        String messageContent1 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_child")
+                        String messageContent1 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getIdLong(), "message_rules_child")
                                 .getStringValue();
 
                         EmbedBuilder embedBuilder1 = new EmbedBuilder()
@@ -892,7 +892,7 @@ public class MenuEvents extends ListenerAdapter {
                         event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
                     }
                     case "admin" -> {
-                        String messageContent2 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_admin")
+                        String messageContent2 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getIdLong(), "message_rules_admin")
                                 .getStringValue();
 
                         EmbedBuilder embedBuilder1 = new EmbedBuilder()
@@ -903,7 +903,7 @@ public class MenuEvents extends ListenerAdapter {
                         event.getInteraction().replyEmbeds(embedBuilder1.build()).setEphemeral(true).queue();
                     }
                     case "other" -> {
-                        String messageContent3 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getId(), "message_rules_other")
+                        String messageContent3 = SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getIdLong(), "message_rules_other")
                                 .getStringValue();
 
                         EmbedBuilder embedBuilder1 = new EmbedBuilder()

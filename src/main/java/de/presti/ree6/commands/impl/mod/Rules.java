@@ -37,11 +37,11 @@ public class Rules implements ICommand {
 
         if (commandEvent.getMember().hasPermission(Permission.ADMINISTRATOR) && commandEvent.getMember().hasPermission(Permission.MANAGE_SERVER)) {
 
-            String messageContent1 = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "message_rules_1")
+            String messageContent1 = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "message_rules_1")
                     .getStringValue();
-            String messageContent2 = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "message_rules_2")
+            String messageContent2 = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "message_rules_2")
                     .getStringValue();
-            String messageContent3 = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "message_rules_3")
+            String messageContent3 = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "message_rules_3")
                     .getStringValue();
 
             EmbedBuilder embedBuilder = new EmbedBuilder()

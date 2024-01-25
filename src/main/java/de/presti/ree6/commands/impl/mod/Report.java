@@ -13,7 +13,7 @@ import de.presti.ree6.logger.events.LogTyp;
 import de.presti.ree6.logger.events.implentation.LogMessageMember;
 import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
-import de.presti.ree6.sql.entities.webhook.Webhook;
+import de.presti.ree6.sql.entities.webhook.base.Webhook;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -107,7 +107,7 @@ public class Report implements ICommand {
         wm.setAvatarUrl(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
         wm.setUsername(BotConfig.getBotName() + "-Moders");
 
-        String lastReport = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getId(), "data_last_report").getStringValue();
+        String lastReport = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "data_last_report").getStringValue();
 
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
         we.setColor(Color.BLACK.getRGB());
@@ -122,9 +122,9 @@ public class Report implements ICommand {
 
         wm.addEmbeds(we.build());
 
-        Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getModWebhook(commandEvent.getGuild().getId());
-        WebhookUtil.sendWebhook(null, wm.build(), Long.parseLong(webhook.getWebhookId()), webhook.getToken(), false);
-        SQLSession.getSqlConnector().getSqlWorker().setSetting(commandEvent.getGuild().getId(), "data_last_report", "Last Report", Integer.parseInt(lastReport)+1);
+        Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getModWebhook(commandEvent.getGuild().getIdLong());
+        WebhookUtil.sendWebhook(null, wm.build(), webhook.getWebhookId(), webhook.getToken(), false);
+        SQLSession.getSqlConnector().getSqlWorker().setSetting(commandEvent.getGuild().getIdLong(), "data_last_report", "Last Report", Integer.parseInt(lastReport)+1);
 
         commandEvent.reply("Ваш отчёт успешно записан!", 5);
     }
