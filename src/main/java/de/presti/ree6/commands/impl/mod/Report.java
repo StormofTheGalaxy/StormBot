@@ -16,7 +16,6 @@ import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.webhook.base.Webhook;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -53,7 +52,7 @@ public class Report implements ICommand {
                 OptionMapping proofOption = commandEvent.getOption("proof");
 
                 if (targetOption != null && reasonOption != null && targetOption.getAsMember() != null) {
-                    sendModWebhook(commandEvent, targetOption.getMentions().getUsers().get(0), reasonOption.getAsString(), ruleOption.getAsString(), proofOption.getAsString());
+                    sendModWebhook(commandEvent, targetOption.getAsMember(), reasonOption.getAsString(), ruleOption.getAsString(), proofOption.getAsString());
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                 }
@@ -68,7 +67,7 @@ public class Report implements ICommand {
                         String reason = commandEvent.getArguments()[1];
                         String rule = commandEvent.getArguments()[2];
                         String proof = commandEvent.getArguments()[3];
-                        sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getUsers().get(0), reason, rule, proof);
+                        sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), reason, rule, proof);
                     }
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
@@ -103,7 +102,7 @@ public class Report implements ICommand {
         return new String[0];
     }
 
-    public void sendModWebhook(CommandEvent commandEvent, User target, String punishment, String reason, String link) {
+    public void sendModWebhook(CommandEvent commandEvent, Member target, String punishment, String reason, String link) {
         WebhookMessageBuilder wm = new WebhookMessageBuilder();
 
         wm.setAvatarUrl(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
