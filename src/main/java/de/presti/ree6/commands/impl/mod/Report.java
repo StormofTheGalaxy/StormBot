@@ -15,6 +15,7 @@ import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.webhook.base.Webhook;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -51,7 +52,7 @@ public class Report implements ICommand {
                 OptionMapping proofOption = commandEvent.getOption("proof");
 
                 if (targetOption != null && reasonOption != null && targetOption.getAsMember() != null) {
-                    sendModWebhook(commandEvent, reasonOption.getAsString(), ruleOption.getAsString(), proofOption.getAsString());
+                    sendModWebhook(commandEvent, targetOption.getAsMember(), reasonOption.getAsString(), ruleOption.getAsString(), proofOption.getAsString());
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                 }
@@ -101,7 +102,7 @@ public class Report implements ICommand {
         return new String[0];
     }
 
-    public void sendModWebhook(CommandEvent commandEvent, String punishment, String reason, String link) {
+    public void sendModWebhook(CommandEvent commandEvent, Member target, String punishment, String reason, String link) {
         WebhookMessageBuilder wm = new WebhookMessageBuilder();
 
         wm.setAvatarUrl(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
@@ -115,7 +116,7 @@ public class Report implements ICommand {
         we.setAuthor(new WebhookEmbed.EmbedAuthor(commandEvent.getUser().getEffectiveName(), commandEvent.getUser().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl()));
         we.setTimestamp(Instant.now());
-        we.setDescription(commandEvent.getUser().getAsMention() + ", вы нарушили правила проекта");
+        we.setDescription(target.getAsMention() + ", вы нарушили правила проекта");
         we.addField(new WebhookEmbed.EmbedField(false, "Пункт правил", reason));
         we.addField(new WebhookEmbed.EmbedField(false, "Наказание", punishment));
         we.addField(new WebhookEmbed.EmbedField(false, "Ссылка на сообщение", link));
