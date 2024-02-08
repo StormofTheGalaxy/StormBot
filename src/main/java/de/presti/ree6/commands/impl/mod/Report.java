@@ -67,7 +67,7 @@ public class Report implements ICommand {
                         String reason = commandEvent.getArguments()[1];
                         String rule = commandEvent.getArguments()[2];
                         String proof = commandEvent.getArguments()[3];
-                        sendModWebhook(commandEvent, reason, rule, proof);
+                        sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), reason, rule, proof);
                     }
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
