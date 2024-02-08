@@ -113,7 +113,7 @@ public class Report implements ICommand {
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
         we.setColor(Color.BLACK.getRGB());
         we.setTitle(new WebhookEmbed.EmbedTitle("**__Отчёт №"+lastReport+"__**", null));
-        we.setAuthor(new WebhookEmbed.EmbedAuthor(commandEvent.getUser().getEffectiveName(), commandEvent.getUser().getEffectiveAvatarUrl(), null));
+        //we.setAuthor(new WebhookEmbed.EmbedAuthor(commandEvent.getUser().getEffectiveName(), commandEvent.getUser().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl()));
         we.setTimestamp(Instant.now());
         we.setDescription(target.getAsMention() + ", вы нарушили правила проекта");
