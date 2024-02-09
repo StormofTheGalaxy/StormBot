@@ -125,6 +125,7 @@ public class Report implements ICommand {
         we.addField(new WebhookEmbed.EmbedField(false, "Ссылка на сообщение", link));
 
         wm.addEmbeds(we.build());
+        wm.setContent("||"+target.getAsMention()+"||");
 
         Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getModWebhook(commandEvent.getGuild().getIdLong());
         WebhookUtil.sendWebhook(null, wm.build(), webhook.getWebhookId(), webhook.getToken(), false);
