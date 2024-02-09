@@ -37,17 +37,13 @@ public class Report implements ICommand {
      */
     @Override
     public void onPerform(CommandEvent commandEvent) {
-        if (!commandEvent.getGuild().getSelfMember().hasPermission(Permission.MODERATE_MEMBERS)) {
-            commandEvent.reply(commandEvent.getResource("message.default.needPermission", Permission.MODERATE_MEMBERS.name()), 5);
-            return;
-        }
 
-        if (commandEvent.getMember().hasPermission(Permission.MODERATE_MEMBERS)) {
+
 
             if (commandEvent.isSlashCommand()) {
 
                 OptionMapping targetOption = commandEvent.getOption("target");
-                OptionMapping reasonOption = commandEvent.getOption("reason");
+                OptionMapping reasonOption = commandEvent.getOption("punishment");
                 OptionMapping ruleOption = commandEvent.getOption("rule");
                 OptionMapping proofOption = commandEvent.getOption("proof");
 
@@ -58,26 +54,33 @@ public class Report implements ICommand {
                 }
 
             } else {
-                if (commandEvent.getArguments().length == 4) {
-                    assert commandEvent.getMessage() != null;
-                    if (commandEvent.getMessage().getMentions().getMembers().isEmpty()) {
-                        commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
-                        commandEvent.reply(commandEvent.getResource("message.default.usage","report @user"), 5);
+
+                if (!commandEvent.getGuild().getSelfMember().hasPermission(Permission.MODERATE_MEMBERS)) {
+                    commandEvent.reply(commandEvent.getResource("message.default.needPermission", Permission.MODERATE_MEMBERS.name()), 5);
+                    return;
+                }
+                if (commandEvent.getMember().hasPermission(Permission.MODERATE_MEMBERS)) {
+                    if (commandEvent.getArguments().length == 4) {
+                        assert commandEvent.getMessage() != null;
+                        if (commandEvent.getMessage().getMentions().getMembers().isEmpty()) {
+                            commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
+                            commandEvent.reply(commandEvent.getResource("message.default.usage","report @user"), 5);
+                        } else {
+                            String reason = commandEvent.getArguments()[1];
+                            String rule = commandEvent.getArguments()[2];
+                            String proof = commandEvent.getArguments()[3];
+                            sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), reason, rule, proof);
+                        }
                     } else {
-                        String reason = commandEvent.getArguments()[1];
-                        String rule = commandEvent.getArguments()[2];
-                        String proof = commandEvent.getArguments()[3];
-                        sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), reason, rule, proof);
+                        commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
+                        commandEvent.reply(commandEvent.getResource("message.default.usage","report @user reason rule proof"), 5);
                     }
                 } else {
-                    commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
-                    commandEvent.reply(commandEvent.getResource("message.default.usage","report @user reason rule proof"), 5);
+                    commandEvent.reply(commandEvent.getResource("message.default.insufficientPermission", Permission.MODERATE_MEMBERS.name()), 5);
                 }
             }
 
-        } else {
-            commandEvent.reply(commandEvent.getResource("message.default.insufficientPermission", Permission.MODERATE_MEMBERS.name()), 5);
-        }
+
         Main.getInstance().getCommandManager().deleteMessage(commandEvent.getMessage(), commandEvent.getInteractionHook());
     }
 
@@ -88,7 +91,7 @@ public class Report implements ICommand {
     public CommandData getCommandData() {
         return new CommandDataImpl("report", "Отправляет отчёт на вебхук")
                 .addOptions(new OptionData(OptionType.USER, "target", "Кого сегодня забаним?").setRequired(true))
-                .addOptions(new OptionData(OptionType.STRING, "reason", "Что мы с ним сделаем?").setRequired(true))
+                .addOptions(new OptionData(OptionType.STRING, "punishment", "Что мы с ним сделаем?").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "rule", "Какой пункт правил был нарушен?").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "proof", "Ссылка на доказательства").setRequired(true))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS));
