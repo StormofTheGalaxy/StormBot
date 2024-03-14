@@ -9,8 +9,6 @@ import de.presti.ree6.commands.Category;
 import de.presti.ree6.commands.CommandEvent;
 import de.presti.ree6.commands.interfaces.Command;
 import de.presti.ree6.commands.interfaces.ICommand;
-import de.presti.ree6.logger.events.LogTyp;
-import de.presti.ree6.logger.events.implentation.LogMessageMember;
 import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.webhook.base.Webhook;
@@ -114,7 +112,7 @@ public class Report implements ICommand {
         String lastReport = SQLSession.getSqlConnector().getSqlWorker().getSetting(commandEvent.getGuild().getIdLong(), "data_last_report").getStringValue();
 
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
-        we.setColor(Color.decode("#4b77dd"));
+        we.setColor(Color.decode("#4b77dd").getRGB());
         we.setTitle(new WebhookEmbed.EmbedTitle("**__Отчёт №"+lastReport+"__**", null));
         //we.setAuthor(new WebhookEmbed.EmbedAuthor(commandEvent.getUser().getEffectiveName(), commandEvent.getUser().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(commandEvent.getGuild().getName() + " - " + BotConfig.getAdvertisement(), commandEvent.getGuild().getIconUrl()));
