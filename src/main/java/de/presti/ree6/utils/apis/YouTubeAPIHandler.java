@@ -1,5 +1,6 @@
 package de.presti.ree6.utils.apis;
 
+import de.presti.ree6.bot.BotConfig;
 import de.presti.ree6.utils.data.RegExUtil;
 import de.presti.wrapper.YouTubeWrapper;
 import de.presti.wrapper.entities.VideoResult;
@@ -67,17 +68,21 @@ public class YouTubeAPIHandler {
      *
      * @param channelId The channel id.
      * @return A list of all Video ids.
-     * @throws Exception if something went wrong.
      */
     public List<VideoResult> getYouTubeUploads(String channelId) throws IOException, InterruptedException, IllegalAccessException {
         List<VideoResult> playlistItemList = new ArrayList<>();
 
         if (isValidChannelId(channelId)) {
+            if (BotConfig.isDebug())
+                log.info("Getting videos for channel: " + channelId);
             ChannelVideoResult channelVideo = YouTubeWrapper.getChannelVideo(channelId);
 
             // Convert it to an actual Video instead of a stripped down version.
             for (VideoResult video : channelVideo.getVideos()) {
                 try {
+                    // We are doing this to get the full video object,
+                    // because the channel video result only contains a stripped down version of the video.
+                    // Mainly because of upload information.
                     playlistItemList.add(YouTubeWrapper.getVideo(video.getId(), false));
                 } catch (Exception exception) {
                     Sentry.captureException(exception);
@@ -88,6 +93,7 @@ public class YouTubeAPIHandler {
 
             for (VideoResult shorts : channelShorts.getShorts()) {
                 try {
+                    // Same as above, but for shorts.
                     playlistItemList.add(YouTubeWrapper.getVideo(shorts.getId(), true));
                 } catch (Exception exception) {
                     Sentry.captureException(exception);

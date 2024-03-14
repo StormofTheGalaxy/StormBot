@@ -5,14 +5,14 @@ import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import de.presti.ree6.commands.impl.mod.Ban;
 import de.presti.ree6.language.LanguageService;
-import de.presti.ree6.logger.events.LogMessage;
-import de.presti.ree6.logger.events.LogTyp;
-import de.presti.ree6.logger.events.implentation.LogMessageMember;
-import de.presti.ree6.logger.events.implentation.LogMessageRole;
-import de.presti.ree6.logger.events.implentation.LogMessageUser;
-import de.presti.ree6.logger.events.implentation.LogMessageVoice;
-import de.presti.ree6.logger.invite.InviteContainer;
-import de.presti.ree6.logger.invite.InviteContainerManager;
+import de.presti.ree6.logger.LogMessage;
+import de.presti.ree6.logger.LogTyp;
+import de.presti.ree6.logger.events.LogMessageMember;
+import de.presti.ree6.logger.events.LogMessageRole;
+import de.presti.ree6.logger.events.LogMessageUser;
+import de.presti.ree6.logger.events.LogMessageVoice;
+import de.presti.ree6.module.invite.InviteContainer;
+import de.presti.ree6.module.invite.InviteContainerManager;
 import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.Invite;
@@ -79,7 +79,7 @@ public class LoggingEvents extends ListenerAdapter {
         if (!event.getGuild().getSelfMember().hasPermission(Permission.MANAGE_SERVER)) return;
 
         Invite invite = event.getOldVanityCode() != null ?
-                SQLSession.getSqlConnector().getSqlWorker().getEntity(new Invite(), "FROM Invite WHERE guildAndCode.guild = :gid AND guildAndCode.code = :code",
+                SQLSession.getSqlConnector().getSqlWorker().getEntity(new Invite(), "FROM Invite WHERE guildAndCode.guildId = :gid AND guildAndCode.code = :code",
                         Map.of("gid", event.getGuild().getIdLong(), "code", event.getOldVanityCode()))
                 : null;
 
@@ -241,7 +241,7 @@ public class LoggingEvents extends ListenerAdapter {
                     }
                 });
             } else {
-                InviteContainer inviteContainer = InviteContainerManager.getRightInvite(event.getGuild());
+                InviteContainer inviteContainer = Main.getInstance().getInviteContainerManager().getRightInvite(event.getGuild());
                 if (inviteContainer != null) {
                     inviteContainer.setUses(inviteContainer.getUses() + 1);
                     if (inviteContainer.isVanity()) {
@@ -249,7 +249,7 @@ public class LoggingEvents extends ListenerAdapter {
                     } else {
                         wm2.append(LanguageService.getByEvent(event, "logging.joined.invite.default", event.getUser().getAsMention(), "<@" + inviteContainer.getCreatorId() + ">", inviteContainer.getCode(), inviteContainer.getUses()));
                     }
-                    InviteContainerManager.addInvite(inviteContainer);
+                    Main.getInstance().getInviteContainerManager().add(inviteContainer);
                 } else {
                     wm2.append(LanguageService.getByEvent(event, "logging.joined.invite.notFound", event.getMember().getAsMention()));
                 }
@@ -317,8 +317,8 @@ public class LoggingEvents extends ListenerAdapter {
 
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
         we.setColor(Color.BLACK.getRGB());
-        we.setThumbnailUrl(event.getUser().getEffectiveAvatarUrl());
-        we.setAuthor(new WebhookEmbed.EmbedAuthor(event.getUser().getEffectiveName(), event.getUser().getEffectiveAvatarUrl(), null));
+        we.setThumbnailUrl(event.getMember().getEffectiveAvatarUrl());
+        we.setAuthor(new WebhookEmbed.EmbedAuthor(event.getUser().getEffectiveName(), event.getMember().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl()));
         we.setTimestamp(Instant.now());
         AuditLogPaginationAction paginationAction = event.getGuild().retrieveAuditLogs().user(event.getUser()).type(ActionType.MEMBER_UPDATE).limit(1);
@@ -604,8 +604,8 @@ public class LoggingEvents extends ListenerAdapter {
 
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
         we.setColor(Color.BLACK.getRGB());
-        we.setThumbnailUrl(event.getUser().getEffectiveAvatarUrl());
-        we.setAuthor(new WebhookEmbed.EmbedAuthor(event.getUser().getEffectiveName(), event.getUser().getEffectiveAvatarUrl(), null));
+        we.setThumbnailUrl(event.getMember().getEffectiveAvatarUrl());
+        we.setAuthor(new WebhookEmbed.EmbedAuthor(event.getUser().getEffectiveName(), event.getMember().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl()));
         we.setTimestamp(Instant.now());
 
@@ -645,8 +645,8 @@ public class LoggingEvents extends ListenerAdapter {
 
         WebhookEmbedBuilder we = new WebhookEmbedBuilder();
         we.setColor(Color.BLACK.getRGB());
-        we.setThumbnailUrl(event.getUser().getEffectiveAvatarUrl());
-        we.setAuthor(new WebhookEmbed.EmbedAuthor(event.getUser().getEffectiveName(), event.getUser().getEffectiveAvatarUrl(), null));
+        we.setThumbnailUrl(event.getMember().getEffectiveAvatarUrl());
+        we.setAuthor(new WebhookEmbed.EmbedAuthor(event.getUser().getEffectiveName(), event.getMember().getEffectiveAvatarUrl(), null));
         we.setFooter(new WebhookEmbed.EmbedFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl()));
         we.setTimestamp(Instant.now());
 
@@ -1010,7 +1010,7 @@ public class LoggingEvents extends ListenerAdapter {
 
         if (event.getInvite().getInviter() != null) {
             InviteContainer inv = new InviteContainer(event.getInvite().getInviter().getIdLong(), event.getGuild().getIdLong(), event.getInvite().getCode(), event.getInvite().getUses(), false);
-            InviteContainerManager.addInvite(inv);
+            Main.getInstance().getInviteContainerManager().add(inv);
         }
     }
 
@@ -1024,7 +1024,7 @@ public class LoggingEvents extends ListenerAdapter {
             return;
         }
 
-        InviteContainerManager.removeInvite(event.getGuild().getIdLong(), event.getCode());
+        Main.getInstance().getInviteContainerManager().remove(event.getGuild().getIdLong(), event.getCode());
     }
 
     //endregion

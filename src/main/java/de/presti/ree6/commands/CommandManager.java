@@ -213,7 +213,11 @@ public class CommandManager {
                 for (DiscordLocale discordLocale : DiscordLocale.values()) {
                     if (!LanguageService.languageResources.containsKey(discordLocale)) continue;
 
+                    if (commandAnnotation.description().endsWith(".") || !commandAnnotation.description().contains("."))
+                        continue;
+
                     String description = LanguageService.getByLocale(discordLocale, commandAnnotation.description());
+
                     if (description.equals("Missing language resource!")) {
                         description = LanguageService.getDefault(commandAnnotation.description());
                     }
@@ -221,6 +225,8 @@ public class CommandManager {
                     if (!description.equals("Missing language resource!")) {
                         commandData1.setDescriptionLocalization(discordLocale, description);
                     }
+
+                    commandData1.getSubcommandGroups().forEach(subcommandGroupData -> translateSubgroups(subcommandGroupData, discordLocale));
                 }
 
                 String description = LanguageService.getDefault(commandAnnotation.description());
@@ -252,6 +258,38 @@ public class CommandManager {
         }
 
         listUpdateAction.queue();
+    }
+
+    public void translateSubgroups(SubcommandGroupData subcommandGroupData, DiscordLocale locale) {
+        String groupDescription = subcommandGroupData.getDescription();
+
+        if (groupDescription.contains(".") && !groupDescription.endsWith(".")) {
+            groupDescription = LanguageService.getByLocale(locale, groupDescription);
+
+            if (groupDescription.equals("Missing language resource!")) {
+                groupDescription = LanguageService.getDefault(subcommandGroupData.getDescription());
+            }
+
+            if (!groupDescription.equals("Missing language resource!")) {
+                subcommandGroupData.setDescriptionLocalization(locale, groupDescription);
+            }
+        }
+
+        for (SubcommandData subcommandData : subcommandGroupData.getSubcommands()) {
+            String commandDescription = subcommandData.getDescription();
+
+            if (commandDescription.contains(".") && !commandDescription.endsWith(".")) {
+                commandDescription = LanguageService.getByLocale(locale, commandDescription);
+
+                if (commandDescription.equals("Missing language resource!")) {
+                    commandDescription = LanguageService.getDefault(subcommandData.getDescription());
+                }
+
+                if (!commandDescription.equals("Missing language resource!")) {
+                    subcommandData.setDescriptionLocalization(locale, commandDescription);
+                }
+            }
+        }
     }
 
     /**
