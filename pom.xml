@@ -45,16 +45,19 @@
     <dependencies>
         <!-- Discord -->
         <dependency>
-            <!-- net.dv8tion -->
-            <groupId>io.github.JDA-Fork</groupId>
+            <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <!-- 5.0.0-beta.20 -->
-            <version>a28502724c</version>
+            <version>5.0.0-beta.23</version>
         </dependency>
         <dependency>
-            <groupId>dev.arbjerg</groupId>
+            <groupId>com.github.lavalink-devs.lavaplayer</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>2.1.1</version>
+            <version>0ab6311a5f</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.lavalink-devs</groupId>
+            <artifactId>youtube-source</artifactId>
+            <version>59fe89297b</version>
         </dependency>
         <dependency>
             <groupId>com.sedmelluq</groupId>
@@ -71,7 +74,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry</artifactId>
-            <version>7.6.0</version>
+            <version>7.8.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.Carleslc.Simple-YAML</groupId>
@@ -95,7 +98,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.19.0</version>
+            <version>1.20.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.redouane59.twitter</groupId>
@@ -110,14 +113,19 @@
         <dependency>
             <groupId>me.presti</groupId>
             <artifactId>TikTokWrapper</artifactId>
-            <version>1.0</version>
+            <version>d9194fb3fa</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jwdeveloper.TikTok-Live-Java</groupId>
+            <artifactId>Client</artifactId>
+            <version>1.6.0-Release</version>
         </dependency>
 
         <!-- Music -->
         <dependency>
             <groupId>se.michaelthelin.spotify</groupId>
             <artifactId>spotify-web-api-java</artifactId>
-            <version>8.3.6</version>
+            <version>8.4.0</version>
         </dependency>
         <dependency>
             <groupId>de.ree6</groupId>
@@ -158,26 +166,26 @@
         <dependency>
             <groupId>com.github.gru2007</groupId>
             <artifactId>Storm-SQL</artifactId>
-            <version>2.2.6</version>
+            <version>2.2.7</version>
         </dependency>
 
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.12</version>
+            <version>2.0.13</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.3</version>
+            <version>1.5.6</version>
         </dependency>
 
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
 
@@ -201,39 +209,39 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.15.1</version>
+            <version>2.16.1</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.16.1</version>
+            <version>1.17.0</version>
         </dependency>
 
         <!-- Jersey and Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.16.2</version>
+            <version>2.17.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.16.2</version>
+            <version>2.17.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.16.2</version>
+            <version>2.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
-            <version>3.1.5</version>
+            <version>3.1.6</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>3.1.5</version>
+            <version>3.1.6</version>
         </dependency>
 
 
@@ -311,7 +319,7 @@
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>8.0.1</version>
+                <version>8.0.2</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -336,7 +344,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>

@@ -3,10 +3,10 @@ package de.presti.ree6.utils.apis;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import cn.hutool.core.exceptions.ValidateException;
 import com.apptasticsoftware.rssreader.Channel;
 import com.apptasticsoftware.rssreader.Image;
 import com.apptasticsoftware.rssreader.Item;
-import com.apptasticsoftware.rssreader.RssReader;
 import com.apptasticsoftware.rssreader.module.itunes.ItunesItem;
 import com.apptasticsoftware.rssreader.module.itunes.ItunesRssReader;
 import com.github.instagram4j.instagram4j.IGClient;
@@ -23,15 +23,16 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.auth.TwitchAuth;
 import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
+import com.github.twitch4j.chat.events.channel.FollowEvent;
 import com.github.twitch4j.events.ChannelFollowCountUpdateEvent;
 import com.github.twitch4j.events.ChannelGoLiveEvent;
 import com.github.twitch4j.eventsub.events.ChannelSubscribeEvent;
 import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.pubsub.PubSubSubscription;
-import com.github.twitch4j.pubsub.events.FollowingEvent;
 import com.github.twitch4j.pubsub.events.RewardRedeemedEvent;
 import de.presti.ree6.actions.streamtools.container.StreamActionContainer;
 import de.presti.ree6.actions.streamtools.container.StreamActionContainerCreator;
+import de.presti.ree6.bot.BotConfig;
 import de.presti.ree6.bot.BotWorker;
 import de.presti.ree6.bot.util.WebhookUtil;
 import de.presti.ree6.language.LanguageService;
@@ -40,7 +41,6 @@ import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.TwitchIntegration;
 import de.presti.ree6.sql.entities.stats.ChannelStats;
 import de.presti.ree6.sql.entities.webhook.*;
-import de.presti.ree6.bot.BotConfig;
 import de.presti.ree6.utils.data.DatabaseStorageBackend;
 import de.presti.ree6.utils.others.ThreadUtil;
 import de.presti.wrapper.entities.VideoResult;
@@ -56,19 +56,20 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import masecla.reddit4j.client.Reddit4J;
 import masecla.reddit4j.exceptions.AuthenticationException;
+import masecla.reddit4j.objects.RedditPost;
 import masecla.reddit4j.objects.Sorting;
 import masecla.reddit4j.objects.subreddit.RedditSubreddit;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jsoup.HttpStatusException;
 
 import java.awt.*;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -190,11 +191,11 @@ public class Notifier {
 
                 OAuth2Credential credential = new OAuth2Credential("twitch", twitchIntegrations.getToken());
 
-                PubSubSubscription[] subscriptions = new PubSubSubscription[3];
+                PubSubSubscription[] subscriptions = new PubSubSubscription[2];
                 subscriptions[0] = getTwitchClient().getPubSub().listenForChannelPointsRedemptionEvents(credential, twitchIntegrations.getChannelId());
                 subscriptions[1] = getTwitchClient().getPubSub().listenForSubscriptionEvents(credential, twitchIntegrations.getChannelId());
-                // TODO:: update this to the new PubSub Event
-                subscriptions[2] = getTwitchClient().getPubSub().listenForFollowingEvents(credential, twitchIntegrations.getChannelId());
+
+                getTwitchClient().getClientHelper().enableFollowEventListener(twitchIntegrations.getChannelId());
 
                 twitchSubscription.put(credential.getUserId(), subscriptions);
             }
@@ -210,13 +211,12 @@ public class Notifier {
                 });
             });
 
-            // TODO:: update this to the new Event.
-            twitchClient.getEventManager().onEvent(FollowingEvent.class, event -> {
+            twitchClient.getEventManager().onEvent(FollowEvent.class, event -> {
                 List<StreamActionContainer> list = StreamActionContainerCreator.getContainers(1);
                 list.forEach(container -> {
-                    if (!event.getChannelId().equalsIgnoreCase(container.getTwitchChannelId())) return;
+                    if (!event.getChannel().getId().equalsIgnoreCase(container.getTwitchChannelId())) return;
 
-                    container.runActions(event, event.getData().getUsername());
+                    container.runActions(event, event.getUser().getName());
                 });
             });
 
@@ -645,6 +645,7 @@ public class Notifier {
         if (isTwitchRegistered(twitchChannel)) registeredTwitchChannels.remove(twitchChannel);
 
         getTwitchClient().getClientHelper().disableStreamEventListener(twitchChannel);
+        getTwitchClient().getClientHelper().disableFollowEventListener(twitchChannel);
     }
 
     /**
@@ -741,7 +742,7 @@ public class Notifier {
                                         playlistItem.getActualUploadDate() != null && !playlistItem.getActualUploadDate().before(new Date(System.currentTimeMillis() - Duration.ofDays(2).toMillis()))) {
 
                                     Main.getInstance().logAnalytic("Passed! -> " + playlistItem.getTitle() + " | " + playlistItem.getUploadDate() + " | " + playlistItem.getActualUploadDate());
-                                    // Create Webhook Message.
+                                    // Create a Webhook Message.
                                     WebhookMessageBuilder webhookMessageBuilder = new WebhookMessageBuilder();
 
                                     webhookMessageBuilder.setAvatarUrl(BotWorker.getShardManager().getShards().get(0).getSelfUser().getAvatarUrl());
@@ -754,14 +755,7 @@ public class Notifier {
 
                                     webhookEmbedBuilder.setImageUrl(playlistItem.getThumbnail());
 
-                                    // Set rest of the Information.
-                                    webhookEmbedBuilder.addField(new WebhookEmbed.EmbedField(true, "**Title**", playlistItem.getTitle()));
-                                    webhookEmbedBuilder.addField(new WebhookEmbed.EmbedField(true, "**Description**", playlistItem.getDescriptionSnippet() != null ? "No Description" : playlistItem.getDescriptionSnippet()));
-
-                                    webhookEmbedBuilder.setDescription("[Click here to watch the Video](https://www.youtube.com/watch?v=" + playlistItem.getId() + ")");
-
-                                    if (playlistItem.getUploadDate() != -1)
-                                        webhookEmbedBuilder.addField(new WebhookEmbed.EmbedField(true, "**Upload Date**", TimeFormat.DATE_TIME_SHORT.format(playlistItem.getUploadDate())));
+                                    webhookEmbedBuilder.setDescription("[**" + playlistItem.getTitle() + "**](https://www.youtube.com/watch?v=" + playlistItem.getId() + ")");
 
                                     webhookEmbedBuilder.setFooter(new WebhookEmbed.EmbedFooter(BotConfig.getAdvertisement(), BotWorker.getShardManager().getShards().get(0).getSelfUser().getAvatarUrl()));
                                     webhookEmbedBuilder.setColor(Color.RED.getRGB());
@@ -772,7 +766,7 @@ public class Notifier {
                                                 .replace("%description%", playlistItem.getDescriptionSnippet() != null ? "No Description" : playlistItem.getDescriptionSnippet())
                                                 .replace("%url%", "https://www.youtube.com/watch?v=" + playlistItem.getId());
 
-                                        webhookEmbedBuilder.setDescription(message);
+                                        webhookMessageBuilder.setContent(message);
                                         webhookMessageBuilder.addEmbeds(webhookEmbedBuilder.build());
                                         WebhookUtil.sendWebhook(webhookMessageBuilder.build(), webhook);
                                     });
@@ -879,6 +873,19 @@ public class Notifier {
 
     //region Reddit
 
+    public List<RedditPost> getSubredditPosts(String subreddit, Sorting sorting, int limit) throws AuthenticationException, IOException, InterruptedException {
+        try {
+            return redditClient.getSubredditPosts(subreddit, sorting).limit(limit).submit();
+        } catch (ValidateException exception) {
+            if (exception.getMessage().startsWith("The parameter")) {
+                redditClient.userlessConnect();
+                return redditClient.getSubredditPosts(subreddit, sorting).limit(limit).submit();
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
     /**
      * Used to register a Reddit-Post Event for all Subreddits.
      */
@@ -913,7 +920,7 @@ public class Notifier {
                         }
                     }
 
-                    redditClient.getSubredditPosts(subreddit, Sorting.NEW).submit().stream().filter(redditPost -> redditPost.getCreated() > (Duration.ofMillis(System.currentTimeMillis()).toSeconds() - Duration.ofMinutes(5).toSeconds())).forEach(redditPost -> {
+                    getSubredditPosts(subreddit, Sorting.NEW, 50).stream().filter(redditPost -> redditPost.getCreated() > (Duration.ofMillis(System.currentTimeMillis()).toSeconds() - Duration.ofMinutes(5).toSeconds())).forEach(redditPost -> {
                         List<WebhookReddit> webhooks = SQLSession.getSqlConnector().getSqlWorker().getRedditWebhookBySub(subreddit);
 
                         if (webhooks.isEmpty()) return;
@@ -1255,9 +1262,7 @@ public class Notifier {
      * @param users the ID of the TikTok Users.
      */
     public void registerTikTokUser(List<Long> users) {
-        users.forEach(s -> {
-            if (!isTikTokUserRegistered(s)) registeredTikTokUsers.add(s);
-        });
+        users.forEach(this::registerTikTokUser);
     }
 
     /**

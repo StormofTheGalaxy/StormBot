@@ -63,13 +63,17 @@ public class Record implements ICommand {
             AudioChannelUnion audioChannelUnion = voiceState.getChannel();
 
             AudioManager audioManager = commandEvent.getGuild().getAudioManager();
-            audioManager.openAudioConnection(audioChannelUnion);
 
             AudioPlayerReceiveHandler handler = new AudioPlayerReceiveHandler(commandEvent.getMember(), audioChannelUnion);
 
             audioManager.setReceivingHandler(handler);
 
-            commandEvent.getGuild().getSelfMember().deafen(false).queue();
+            audioManager.openAudioConnection(audioChannelUnion);
+
+            if (commandEvent.getGuild().getSelfMember().getVoiceState() != null &&
+                    commandEvent.getGuild().getSelfMember().getVoiceState().inAudioChannel()) {
+                commandEvent.getGuild().getSelfMember().deafen(false).queue();
+            }
 
             commandEvent.reply(commandEvent.getResource("message.record.recordingStarted"));
         } else {
