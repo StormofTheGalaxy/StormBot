@@ -31,20 +31,11 @@ jobs:
         name: Ree6-all
         path: staging
     - name: Upload to Pterodactyl
-      uses: rexlmanu/pterodactyl-upload-action@v2.1
+      uses: Dylan700/sftp-upload-action@latest
       with:
-        panel-host: ${{ secrets.PANEL_HOST }}
-        api-key: ${{ secrets.API_KEY }}
-        server-id: "671f9a45"
-          #   server-ids: |
-          #     5f095019
-          #     7f095019
-        source: "staging/*.jar"
-          #   sources: |
-          #     hello.txt
-          #     hello2.txt
-        target: "./"
-          # If you want to restart the servers after successful upload
-        restart: true
-          # If you want to decompress the files after successful upload
-          # decompress-target: true
+        server: node.stormgalaxy.com
+        username: gru.671f9a45
+        password: ${{secrets.password}}
+        port: 2022
+        uploads: |
+          ./staging => ./
