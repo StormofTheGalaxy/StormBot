@@ -8,11 +8,13 @@ import de.presti.ree6.language.LanguageService;
 import de.presti.ree6.main.Main;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 import java.time.Duration;
@@ -35,8 +37,17 @@ public class xpr implements ICommand {
         if (commandEvent.isSlashCommand()) {
 
             OptionMapping reasonOption = commandEvent.getOption("text");
+            MessageCreateBuilder messageCreateBuilder = new MessageCreateBuilder();
+            messageCreateBuilder.setContent(reasonOption.getAsString());
 
-            commandEvent.getChannel().sendMessage(reasonOption.getAsString());
+            Message message;
+            if (commandEvent.getChannel().canTalk()) {
+                message = commandEvent.getChannel().sendMessage(messageCreateBuilder.build()).complete();
+            } else {
+                message = null;
+            }
+
+            commandEvent.reply("Отправлено ✈️", 5);
 
         }
     }
@@ -47,7 +58,7 @@ public class xpr implements ICommand {
     @Override
     public CommandData getCommandData() {
         return new CommandDataImpl("xpr", "Отправить сообщение от имени бота")
-                .addOptions(new OptionData(OptionType.STRING, "text", "Тест, который нужно отправить.").setRequired(true))
+                .addOptions(new OptionData(OptionType.STRING, "text", "Текст, который нужно отправить.").setRequired(true))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS));
     }
 
