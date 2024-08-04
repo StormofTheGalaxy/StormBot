@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * A command to mute a user.
@@ -51,6 +52,7 @@ public class Mute implements ICommand {
                     }
                     Duration duration = Duration.ofMinutes(time);
                     muteMember(commandEvent.getMember(), targetOption.getAsMember(), duration, (reasonOption != null ? reasonOption.getAsString() : "No Reason given!"), commandEvent);
+                    Report.sendModWebhook(commandEvent, Objects.requireNonNull(targetOption.getAsMember()), "Мут", reasonOption != null ? reasonOption.getAsString() : "", "По требованию");
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                 }
@@ -71,12 +73,14 @@ public class Mute implements ICommand {
                         Duration duration = Duration.ofMinutes(time);
                         String reason = commandEvent.getArguments().length == 3 ? commandEvent.getArguments()[2] : "No Reason given!";
                         muteMember(commandEvent.getMember(), commandEvent.getMessage().getMentions().getMembers().get(0), duration, reason, commandEvent);
+                        Report.sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), "Мут", reason  , "По требованию");
                     }
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
                     commandEvent.reply(commandEvent.getResource("message.default.usage","mute @user"), 5);
                 }
             }
+
         } else {
             commandEvent.reply(commandEvent.getResource("message.default.insufficientPermission", Permission.MODERATE_MEMBERS.name()), 5);
         }

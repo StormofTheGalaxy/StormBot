@@ -20,6 +20,7 @@ import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -168,6 +169,7 @@ public class Warn implements ICommand {
                     SQLSession.getSqlConnector().getSqlWorker().updateEntity(warning);
 
                     commandEvent.reply(commandEvent.getResource("message.warn.success", userMapping.getAsMember().getAsMention(), warnings));
+                    Report.sendModWebhook(commandEvent, Objects.requireNonNull(userMapping.getAsMember()), "Мут", (reasonMapping != null) ? reasonMapping.getAsString() : "", "По требованию");
                     Punishments punishment = SQLSession.getSqlConnector().getSqlWorker().getEntity(new Punishments(), "FROM Punishments WHERE guildAndId.guildId = :gid AND warnings = :amount", Map.of("gid", commandEvent.getGuild().getIdLong(), "amount", warnings));
                     if (punishment != null) {
                         switch (punishment.getAction()) {

@@ -47,6 +47,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,6 +58,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -351,11 +353,13 @@ public class OtherEvents extends ListenerAdapter {
                         preName = preName.split("SPLIT")[0];
 
                         String finalPreName = preName;
-                        voiceChannel.getParentCategory().createVoiceChannel(LanguageService.getByGuild(event.getGuild(), "label.temporalVoiceName",
-                                event.getGuild().getVoiceChannels().stream().filter(c -> c.getName().startsWith(finalPreName)).count() + 1)).queue(channel -> {
-                            event.getGuild().moveVoiceMember(event.getMember(), channel).queue();
-                            ArrayUtil.temporalVoicechannel.add(channel.getId());
-                        });
+                        ChannelAction<VoiceChannel> action = voiceChannel.getParentCategory().createVoiceChannel(LanguageService.getByGuild(event.getGuild(), "label.temporalVoiceName",
+                                event.getGuild().getVoiceChannels().stream().filter(c -> c.getName().startsWith(finalPreName)).count() + 1));
+                        action.addPermissionOverride(event.getChannelJoined().getMembers().get(0), EnumSet.of(Permission.MANAGE_CHANNEL), null);
+                        action.queue(channel -> {
+                                    event.getGuild().moveVoiceMember(event.getMember(), channel).queue();
+                                    ArrayUtil.temporalVoicechannel.add(channel.getId());
+                                });
                     }
                 }
             }

@@ -103,7 +103,7 @@ public class Report implements ICommand {
         return new String[0];
     }
 
-    public void sendModWebhook(CommandEvent commandEvent, Member target, String punishment, String reason, String link) {
+    public static void sendModWebhook(CommandEvent commandEvent, Member target, String punishment, String reason, String link) {
         WebhookMessageBuilder wm = new WebhookMessageBuilder();
 
         wm.setAvatarUrl(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
