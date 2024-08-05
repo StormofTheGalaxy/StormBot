@@ -8,4 +8,5 @@ RUN mvn -f /usr/src/app/pom.xml clean package
 FROM amazoncorretto:21-alpine3.16-full
 ARG JAR_FILE=/usr/src/app/target/*-jar-with-dependencies.jar
 COPY --from=build ${JAR_FILE} /usr/app/Ree6.jar
+WORKDIR "/home/container"
 ENTRYPOINT ["java","-jar","/usr/app/Ree6.jar"]
