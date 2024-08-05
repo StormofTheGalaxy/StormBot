@@ -18,6 +18,11 @@ jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Allow actions to create release
+      packages: write # Allow pushing images to GHCR
+      attestations: write # To create and write attestations
+      id-token: write # Additional permissions for the persistence of the attestations
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
