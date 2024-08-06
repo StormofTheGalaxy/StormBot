@@ -44,6 +44,7 @@ import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateTimeOutEv
 import net.dv8tion.jda.api.events.guild.update.GuildUpdateVanityCodeEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.events.role.RoleCreateEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.events.role.update.*;
@@ -932,6 +933,73 @@ public class LoggingEvents extends ListenerAdapter {
     //endregion
 
     //region Message
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
+        // Is should add that, but let's do that later
+//        if (!SQLSession.getSqlConnector().getSqlWorker().isLogSetup(event.getGuild().getIdLong()) ||
+//                !SQLSession.getSqlConnector().getSqlWorker().getSetting(event.getGuild().getIdLong(), "logging_messagedelete").getBooleanValue())
+//            return;
+
+        User user = ArrayUtil.getUserFromMessageList(event.getMessageId());
+
+        if (user != null) {
+            WebhookMessageBuilder wm = new WebhookMessageBuilder();
+
+            wm.setAvatarUrl(event.getJDA().getSelfUser().getAvatarUrl());
+            wm.setUsername(BotConfig.getBotName() + "-Logs");
+
+            WebhookEmbedBuilder we = new WebhookEmbedBuilder();
+            we.setColor(Color.BLACK.getRGB());
+            we.setAuthor(new WebhookEmbed.EmbedAuthor(user.getName(), user.getEffectiveAvatarUrl(), null));
+            we.setFooter(new WebhookEmbed.EmbedFooter(event.getGuild().getName() + " - " + BotConfig.getAdvertisement(), event.getGuild().getIconUrl()));
+            we.setTimestamp(Instant.now());
+
+            Message message_old = ArrayUtil.getMessageFromMessageList(event.getMessageId());
+            Message message = event.getMessage();
+
+            if (message != null && message.getActivity() != null) return;
+
+            boolean isImageAdded = false;
+
+            if (message != null && !message.getAttachments().isEmpty()) {
+                for (Message.Attachment attachment : message.getAttachments()) {
+                    try {
+                        if (!isImageAdded && attachment.isImage()) {
+                            we.setImageUrl(attachment.getProxyUrl());
+                            isImageAdded = true;
+                        } else {
+                            wm.addFile(attachment.getFileName(), attachment.getProxy().download().get());
+                        }
+                    } catch (Exception exception) {
+                        wm.append(LanguageService.getByGuild(event.getGuild(), "logging.message.attachmentFailed", attachment.getFileName()) + "\n");
+                    }
+                }
+                wm.append(LanguageService.getByGuild(event.getGuild(), "logging.message.attachmentNotice") + "\n");
+            }
+
+            we.setDescription(":pencil: **Сообщение от "+user.getAsMention()+" в "+event.getChannel().getAsMention()+" изменено.**\\n");
+            we.addField(new WebhookEmbed.EmbedField(false, "Новое сообщение", message != null ? message.getContentRaw().length() >= 650 ?
+                    LanguageService.getByGuild(event.getGuild(), "logging.message.tooLong") :
+                    message.getContentRaw() : ""));
+            we.addField(new WebhookEmbed.EmbedField(false, "Старое сообщение", message_old != null ? message_old.getContentRaw().length() >= 650 ?
+                    LanguageService.getByGuild(event.getGuild(), "logging.message.tooLong") :
+                    message_old.getContentRaw() : ""));
+
+            if (message != null && message.getContentRaw().length() >= 650)
+                wm.addFile("message.txt", message.getContentRaw().getBytes(StandardCharsets.UTF_8));
+            if (message_old != null && message_old.getContentRaw().length() >= 650)
+                wm.addFile("message2.txt", message_old.getContentRaw().getBytes(StandardCharsets.UTF_8));
+
+            wm.addEmbeds(we.build());
+
+            Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getLogWebhook(event.getGuild().getIdLong());
+            Main.getInstance().getLoggerQueue().add(new LogMessageUser(webhook.getWebhookId(), webhook.getToken(), wm.build(), event.getGuild(), LogTyp.MESSAGE_UPDATE, user));
+        }
+    }
 
     /**
      * @inheritDoc

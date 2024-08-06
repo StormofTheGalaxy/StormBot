@@ -56,6 +56,7 @@ public enum LogTyp {
      * LogTyp for the Logs which are fired when a Message gets deleted.
      */
     MESSAGE_DELETE,
+    MESSAGE_UPDATE,
     /**
      * LogTyp for not yet implemented Logs.
      */
