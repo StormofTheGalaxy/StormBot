@@ -47,7 +47,7 @@ public class Report implements ICommand {
                 OptionMapping proofOption = commandEvent.getOption("proof");
 
                 if (targetOption != null && reasonOption != null && targetOption.getAsMember() != null) {
-                    sendModWebhook(commandEvent, targetOption.getAsMember(), reasonOption.getAsLong(), ruleOption.getAsString(), proofOption.getAsString());
+                    sendModWebhook(commandEvent, targetOption.getAsMember(), reasonOption.getAsLong(), ruleOption.getAsString(), proofOption.getAsString(), commandEvent.getMember());
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                 }
@@ -85,7 +85,7 @@ public class Report implements ICommand {
         return new String[0];
     }
 
-    public static void sendModWebhook(CommandEvent commandEvent, Member target, long punishment, String reason, String link) {
+    public static void sendModWebhook(CommandEvent commandEvent, Member target, long punishment, String reason, String link, Member moder) {
         WebhookMessageBuilder wm = new WebhookMessageBuilder();
         String punishString = null;
         switch ((int) punishment) {
@@ -130,6 +130,7 @@ public class Report implements ICommand {
         punishmentsLog.setGuildId(commandEvent.getGuild().getIdLong());
         punishmentsLog.setReason(reason);
         punishmentsLog.setUserId(target.getIdLong());
+        punishmentsLog.setModerId(moder.getIdLong());
         punishmentsLog.setAction((int) punishment);
         SQLSession.getSqlConnector().getSqlWorker().updateEntity(punishmentsLog);
 
