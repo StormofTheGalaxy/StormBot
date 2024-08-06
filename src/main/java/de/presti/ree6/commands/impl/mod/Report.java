@@ -68,9 +68,14 @@ public class Report implements ICommand {
         return new CommandDataImpl("report", "Отправляет отчёт на вебхук")
                 .addOptions(new OptionData(OptionType.USER, "target", "Кого сегодня забаним?").setRequired(true))
                 .addOptions(new OptionData(OptionType.INTEGER, "punishment", "Что мы с ним сделаем?")
-                        .addChoice("Варн", 3)
-                        .addChoice("Мут", 1)
-                        .addChoice("Кик", 2)
+                        .addChoice("Warn", 3)
+                        .addChoice("Mute", 1)
+                        .addChoice("Kick", 2)
+                        .addChoice("Ban", 4)
+                        .addChoice("Strike 1", 5)
+                        .addChoice("Strike 2", 6)
+                        .addChoice("Mute + Strike 1", 7)
+                        .addChoice("Mute + Strike 2", 8)
                         .setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "rule", "Какой пункт правил был нарушен?").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "proof", "Ссылка на доказательства").setRequired(true))
@@ -90,14 +95,30 @@ public class Report implements ICommand {
         String punishString = null;
         switch ((int) punishment) {
             case 1 -> {
-                punishString = "Мут";
+                punishString = "Mute";
             }
             case 2 -> {
-                punishString = "Кик";
+                punishString = "Kick";
             }
             case 3 -> {
-                punishString = "Варн";
+                punishString = "Warn";
             }
+            case 4 -> {
+                punishString = "Ban";
+            }
+            case 5 -> {
+                punishString = "Strike 1";
+            }
+            case 6 -> {
+                punishString = "Strike 2";
+            }
+            case 7 -> {
+                punishString = "Mute + Strike 1";
+            }
+            case 8 -> {
+                punishString = "Mute + Strike 2";
+            }
+
             default -> {
                 punishString = "не указано";
             }
