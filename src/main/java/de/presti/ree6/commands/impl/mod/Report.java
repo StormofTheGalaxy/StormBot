@@ -11,6 +11,7 @@ import de.presti.ree6.commands.interfaces.Command;
 import de.presti.ree6.commands.interfaces.ICommand;
 import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
+import de.presti.ree6.sql.entities.PunishmentsLog;
 import de.presti.ree6.sql.entities.webhook.base.Webhook;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -46,36 +47,13 @@ public class Report implements ICommand {
                 OptionMapping proofOption = commandEvent.getOption("proof");
 
                 if (targetOption != null && reasonOption != null && targetOption.getAsMember() != null) {
-                    sendModWebhook(commandEvent, targetOption.getAsMember(), reasonOption.getAsString(), ruleOption.getAsString(), proofOption.getAsString());
+                    sendModWebhook(commandEvent, targetOption.getAsMember(), reasonOption.getAsLong(), ruleOption.getAsString(), proofOption.getAsString());
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                 }
 
             } else {
-
-                if (!commandEvent.getGuild().getSelfMember().hasPermission(Permission.MODERATE_MEMBERS)) {
-                    commandEvent.reply(commandEvent.getResource("message.default.needPermission", Permission.MODERATE_MEMBERS.name()), 5);
-                    return;
-                }
-                if (commandEvent.getMember().hasPermission(Permission.MODERATE_MEMBERS)) {
-                    if (commandEvent.getArguments().length == 4) {
-                        assert commandEvent.getMessage() != null;
-                        if (commandEvent.getMessage().getMentions().getMembers().isEmpty()) {
-                            commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
-                            commandEvent.reply(commandEvent.getResource("message.default.usage","report @user"), 5);
-                        } else {
-                            String reason = commandEvent.getArguments()[1];
-                            String rule = commandEvent.getArguments()[2];
-                            String proof = commandEvent.getArguments()[3];
-                            sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), reason, rule, proof);
-                        }
-                    } else {
-                        commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);
-                        commandEvent.reply(commandEvent.getResource("message.default.usage","report @user reason rule proof"), 5);
-                    }
-                } else {
-                    commandEvent.reply(commandEvent.getResource("message.default.insufficientPermission", Permission.MODERATE_MEMBERS.name()), 5);
-                }
+                commandEvent.reply(commandEvent.getResource("command.perform.onlySlashSupported"));
             }
 
 
@@ -89,7 +67,11 @@ public class Report implements ICommand {
     public CommandData getCommandData() {
         return new CommandDataImpl("report", "Отправляет отчёт на вебхук")
                 .addOptions(new OptionData(OptionType.USER, "target", "Кого сегодня забаним?").setRequired(true))
-                .addOptions(new OptionData(OptionType.STRING, "punishment", "Что мы с ним сделаем?").setRequired(true))
+                .addOptions(new OptionData(OptionType.INTEGER, "punishment", "Что мы с ним сделаем?")
+                        .addChoice("Варн", 3)
+                        .addChoice("Мут", 1)
+                        .addChoice("Кик", 2)
+                        .setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "rule", "Какой пункт правил был нарушен?").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "proof", "Ссылка на доказательства").setRequired(true))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS));
@@ -103,8 +85,23 @@ public class Report implements ICommand {
         return new String[0];
     }
 
-    public static void sendModWebhook(CommandEvent commandEvent, Member target, String punishment, String reason, String link) {
+    public static void sendModWebhook(CommandEvent commandEvent, Member target, long punishment, String reason, String link) {
         WebhookMessageBuilder wm = new WebhookMessageBuilder();
+        String punishString = null;
+        switch ((int) punishment) {
+            case 1 -> {
+                punishString = "Мут";
+            }
+            case 2 -> {
+                punishString = "Кик";
+            }
+            case 3 -> {
+                punishString = "Варн";
+            }
+            default -> {
+                punishString = "не указано";
+            }
+        }
 
         wm.setAvatarUrl(commandEvent.getGuild().getJDA().getSelfUser().getEffectiveAvatarUrl());
         wm.setUsername(BotConfig.getBotName() + "-Moders");
@@ -119,7 +116,7 @@ public class Report implements ICommand {
         we.setTimestamp(Instant.now());
         we.setDescription(target.getAsMention() + ", вы нарушили правила проекта");
         we.addField(new WebhookEmbed.EmbedField(false, "Пункт правил", reason));
-        we.addField(new WebhookEmbed.EmbedField(false, "Наказание", punishment));
+        we.addField(new WebhookEmbed.EmbedField(false, "Наказание", punishString));
         we.addField(new WebhookEmbed.EmbedField(false, "Ссылка на сообщение", link));
 
         wm.addEmbeds(we.build());
@@ -128,6 +125,13 @@ public class Report implements ICommand {
         Webhook webhook = SQLSession.getSqlConnector().getSqlWorker().getModWebhook(commandEvent.getGuild().getIdLong());
         WebhookUtil.sendWebhook(null, wm.build(), webhook.getWebhookId(), webhook.getToken(), false);
         SQLSession.getSqlConnector().getSqlWorker().setSetting(commandEvent.getGuild().getIdLong(), "data_last_report", "Last Report", Integer.parseInt(lastReport)+1);
+
+        PunishmentsLog punishmentsLog = new PunishmentsLog();
+        punishmentsLog.setGuildId(commandEvent.getGuild().getIdLong());
+        punishmentsLog.setReason(reason);
+        punishmentsLog.setUserId(target.getIdLong());
+        punishmentsLog.setAction((int) punishment);
+        SQLSession.getSqlConnector().getSqlWorker().updateEntity(punishmentsLog);
 
         commandEvent.reply("Ваш отчёт успешно записан!", 5);
     }

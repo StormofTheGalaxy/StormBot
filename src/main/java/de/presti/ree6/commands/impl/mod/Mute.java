@@ -52,7 +52,7 @@ public class Mute implements ICommand {
                     }
                     Duration duration = Duration.ofMinutes(time);
                     muteMember(commandEvent.getMember(), targetOption.getAsMember(), duration, (reasonOption != null ? reasonOption.getAsString() : "No Reason given!"), commandEvent);
-                    Report.sendModWebhook(commandEvent, Objects.requireNonNull(targetOption.getAsMember()), "Мут", reasonOption != null ? reasonOption.getAsString() : "", "По требованию");
+                    Report.sendModWebhook(commandEvent, Objects.requireNonNull(targetOption.getAsMember()), 1, reasonOption != null ? reasonOption.getAsString() : "", "По требованию");
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.noMention.user"), 5);
                 }
@@ -73,7 +73,7 @@ public class Mute implements ICommand {
                         Duration duration = Duration.ofMinutes(time);
                         String reason = commandEvent.getArguments().length == 3 ? commandEvent.getArguments()[2] : "No Reason given!";
                         muteMember(commandEvent.getMember(), commandEvent.getMessage().getMentions().getMembers().get(0), duration, reason, commandEvent);
-                        Report.sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), "Мут", reason  , "По требованию");
+                        Report.sendModWebhook(commandEvent, commandEvent.getMessage().getMentions().getMembers().get(0), 1, reason  , "По требованию");
                     }
                 } else {
                     commandEvent.reply(commandEvent.getResource("message.default.invalidQuery"), 5);

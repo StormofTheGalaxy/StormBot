@@ -6,6 +6,7 @@ import de.presti.ree6.commands.interfaces.Command;
 import de.presti.ree6.commands.interfaces.ICommand;
 import de.presti.ree6.sql.SQLSession;
 import de.presti.ree6.sql.entities.Punishments;
+import de.presti.ree6.sql.entities.PunishmentsLog;
 import de.presti.ree6.sql.entities.Warning;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -66,6 +67,7 @@ public class Warn implements ICommand {
                 }
 
                 switch (subCommand) {
+
                     case "roleadd" -> {
                         Punishments punishments = new Punishments();
                         punishments.setGuildId(commandEvent.getGuild().getIdLong());
@@ -169,7 +171,7 @@ public class Warn implements ICommand {
                     SQLSession.getSqlConnector().getSqlWorker().updateEntity(warning);
 
                     commandEvent.reply(commandEvent.getResource("message.warn.success", userMapping.getAsMember().getAsMention(), warnings));
-                    Report.sendModWebhook(commandEvent, Objects.requireNonNull(userMapping.getAsMember()), "Мут", (reasonMapping != null) ? reasonMapping.getAsString() : "", "По требованию");
+                    Report.sendModWebhook(commandEvent, Objects.requireNonNull(userMapping.getAsMember()), 3, (reasonMapping != null) ? reasonMapping.getAsString() : "", "По требованию");
                     Punishments punishment = SQLSession.getSqlConnector().getSqlWorker().getEntity(new Punishments(), "FROM Punishments WHERE guildAndId.guildId = :gid AND warnings = :amount", Map.of("gid", commandEvent.getGuild().getIdLong(), "amount", warnings));
                     if (punishment != null) {
                         switch (punishment.getAction()) {
