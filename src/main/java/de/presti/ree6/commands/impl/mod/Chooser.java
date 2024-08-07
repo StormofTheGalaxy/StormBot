@@ -9,6 +9,7 @@ import de.presti.ree6.main.Main;
 import de.presti.ree6.sql.SQLSession;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -41,8 +42,32 @@ public class Chooser implements ICommand {
             List<SelectOption> optionList = new ArrayList<>();
             List<String> ListMessage = new ArrayList<>();
             assert roles != null;
-            roles.forEach(role -> optionList.add(SelectOption.of(role.getAsRole().getName(), role.getAsRole().getId())));
-            roles.forEach(role -> ListMessage.add(role.getAsRole().getId()));
+            roles.forEach(role -> {
+                if (role.getType() != OptionType.ROLE)
+                    return;
+                OptionMapping decsOp = commandEvent.getOption(role.getName() + "опис");
+                OptionMapping emojiOp = commandEvent.getOption(role.getName() + "эмоджи");
+                String decs;
+                String emoji;
+
+                if (decsOp != null && decsOp.getAsString() != null) {
+                    decs = decsOp.getAsString();
+                } else {
+                    decs = "";
+                }
+                if (emojiOp != null && emojiOp.getAsString() != null) {
+                    emoji = emojiOp.getAsString();
+                } else {
+                    emoji = "";
+                }
+                optionList.add(SelectOption.of(role.getAsRole().getName(), role.getAsRole().getId())
+                                                                    .withDescription(decs)
+                                                                    .withEmoji(Emoji.fromFormatted(emoji)));
+            });
+            roles.forEach(role -> {
+                if (role.getType() != OptionType.ROLE)
+                    return;
+                ListMessage.add(role.getAsRole().getId());});
             String joined = String.join(">\n- <@&", ListMessage);
 
             SelectMenu selectMenu = new StringSelectMenuImpl("chooser", "Выберите роль", 1, 1, false, optionList);
@@ -69,10 +94,24 @@ public class Chooser implements ICommand {
         return new CommandDataImpl("chooser", "Создание меню выбора ролей")
                 .addOptions(
                         new OptionData(OptionType.ROLE, "роль1", "1 роль в списке", true),
+                        new OptionData(OptionType.STRING, "роль1опис", "1 роль описание", false),
+                        new OptionData(OptionType.STRING, "роль1эмоджи", "1 роль эмоджи", false),
+
                         new OptionData(OptionType.ROLE, "роль2", "2 роль в списке", false),
+                        new OptionData(OptionType.STRING, "роль2опис", "2 роль описание", false),
+                        new OptionData(OptionType.STRING, "роль2эмоджи", "2 роль эмоджи", false),
+
                         new OptionData(OptionType.ROLE, "роль3", "3 роль в списке", false),
+                        new OptionData(OptionType.STRING, "роль3опис", "3 роль описание", false),
+                        new OptionData(OptionType.STRING, "роль3эмоджи", "3 роль эмоджи", false),
+
                         new OptionData(OptionType.ROLE, "роль4", "4 роль в списке", false),
-                        new OptionData(OptionType.ROLE, "роль5", "5 роль в списке", false)
+                        new OptionData(OptionType.STRING, "роль4опис", "4 роль описание", false),
+                        new OptionData(OptionType.STRING, "роль4эмоджи", "4 роль эмоджи", false),
+
+                        new OptionData(OptionType.ROLE, "роль5", "5 роль в списке", false),
+                        new OptionData(OptionType.STRING, "роль5опис", "5 роль описание", false),
+                        new OptionData(OptionType.STRING, "роль5эмоджи", "5 роль эмоджи", false)
                 );
 
     }
