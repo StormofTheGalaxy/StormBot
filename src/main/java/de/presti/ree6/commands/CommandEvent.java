@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Event class used to parse and provide Information about a command execution.
@@ -287,6 +288,12 @@ public class CommandEvent {
         if (!isSlashCommand()) return null;
 
         return slashCommandInteractionEvent.getOption(name);
+    }
+
+    public @Nullable List<OptionMapping> getOptions() {
+        if (!isSlashCommand()) return null;
+
+        return slashCommandInteractionEvent.getOptions();
     }
 
     /**

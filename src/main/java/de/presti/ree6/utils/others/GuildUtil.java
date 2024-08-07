@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.interactions.Interaction;
 import java.util.List;
 import java.util.Map;
 
+import static de.presti.ree6.commands.interfaces.ICommand.log;
+
 /**
  * Utility class used to handle Guild specific stuff that is being used multiple times.
  */
@@ -202,10 +204,13 @@ public class GuildUtil {
      * @param member the {@link Member} Entity.
      * @param role   the {@link Role} Entity.
      */
-    private static void addRole(Guild guild, Member member, Role role) {
+    public static void addRole(Guild guild, Member member, Role role, boolean... removeOnExist) {
+        boolean remove = (removeOnExist.length >= 1) ? removeOnExist[0] : false;
         if (guild.getSelfMember().canInteract(role) && guild.getSelfMember().canInteract(member)) {
             if (!member.getRoles().contains(role)) {
                 guild.addRoleToMember(member, role).queue();
+            } else if (remove && member.getRoles().contains(role)) {
+                guild.removeRoleFromMember(member, role).queue();
             }
         } else {
             log.error("[AutoRole] Failed to give a Role!");

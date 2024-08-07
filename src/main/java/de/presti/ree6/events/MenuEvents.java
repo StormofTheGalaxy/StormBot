@@ -17,11 +17,13 @@ import de.presti.ree6.sql.entities.stats.ChannelStats;
 import de.presti.ree6.sql.entities.webhook.base.Webhook;
 import de.presti.ree6.utils.apis.YouTubeAPIHandler;
 import de.presti.ree6.bot.BotConfig;
+import de.presti.ree6.utils.others.ThreadUtil;
 import de.presti.wrapper.entities.channel.ChannelResult;
 import io.github.redouane59.twitter.dto.user.UserV2;
 import masecla.reddit4j.objects.subreddit.RedditSubreddit;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
@@ -58,6 +60,9 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import static de.presti.ree6.commands.interfaces.ICommand.log;
+import static de.presti.ree6.utils.others.GuildUtil.addRole;
 
 /**
  * EventHandler for Menu Events.
@@ -866,14 +871,54 @@ public class MenuEvents extends ListenerAdapter {
                 event.getGuild() == null)
             return;
 
-        if (event.getMessage().getEmbeds().isEmpty() ||
-                event.getMessage().getEmbeds().get(0) == null)
-            return;
+//        if (event.getMessage().getEmbeds().isEmpty() ||
+//                event.getMessage().getEmbeds().get(0) == null)
+//            return;
 
         if (event.getInteraction().getValues().isEmpty() && !event.getInteraction().getComponent().getId().equals("setupAutoRole"))
             return;
 
         switch (event.getInteraction().getComponent().getId()) {
+
+            case "chooser" -> {
+                Member member = event.getMember();
+                Guild guild = event.getGuild();
+
+                if (!guild.getSelfMember().canInteract(member)) {
+                    log.error("[AutoRole] Failed to give a role, on Chooser use!");
+                    log.error("[AutoRole] Server: {} ({})", member.getUser().getName(), event.getId());
+                    log.error("[AutoRole] Member: {} ({})", member.getUser().getName(), member.getId());
+
+                    if (guild.getOwner() != null)
+                        event.getInteraction().reply(LanguageService.getByGuild(guild, "message.brs.autoRole.hierarchy", "@everyone"))
+                                .setEphemeral(true).queue();
+                    return;
+                }
+
+                Role role = guild.getRoleById(event.getInteraction().getValues().get(0));
+                if (role != null && !event.getMessage().getContentRaw().contains(role.getId())) {
+                    event.getInteraction().reply(":octagonal_sign: Данная роль не разрешена к получению").setEphemeral(true).queue();
+                    return;
+                }
+
+                if (role != null && !guild.getSelfMember().canInteract(role)) {
+                    if (guild.getOwner() != null)
+                        event.getInteraction().reply(LanguageService.getByGuild(guild, guild.getSelfMember().hasPermission(Permission.MANAGE_ROLES) ?
+                                                "message.brs.autoRole.hierarchy"
+                                                : "message.brs.autoRole.missingPermission", role.getName()))
+                                .setEphemeral(true).queue();
+                    return;
+                } else if (role == null) {
+                    if (guild.getOwner() != null)
+                        event.getInteraction().reply(LanguageService.getByGuild(guild, "message.brs.autoRole.deleted"))
+                                .setEphemeral(true).queue();
+
+                    return;
+                }
+
+                addRole(guild, member, role, true);
+                event.getInteraction().reply("Ваша роль уже в пути :airplane_departure:").setEphemeral(true).queue();
+            }
 
             case "rulesMenu" -> {
 
