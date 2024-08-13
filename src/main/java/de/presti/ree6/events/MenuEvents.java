@@ -112,7 +112,7 @@ public class MenuEvents extends ListenerAdapter {
         switch (event.getComponentId()) {
             case "training" -> {
                 Modal.Builder builder = Modal.create("training_modal", "Запрос тренировки");
-                builder.addActionRow(TextInput.create("datetime", "Дата и время", TextInputStyle.SHORT).setRequired(true).setPlaceholder("22.06 15:00").setMinLength(11).setMaxLength(11).build());
+                builder.addActionRow(TextInput.create("datetime", "Дата и время (по МСК)", TextInputStyle.SHORT).setRequired(true).setPlaceholder("22.06 15:00").setMinLength(11).setMaxLength(11).build());
                 builder.addActionRow(TextInput.create("addon", "Дополнительная информация", TextInputStyle.PARAGRAPH).setRequired(false).setMaxLength(2042).setMinLength(16).build());
                 event.replyModal(builder.build()).queue();
             }
