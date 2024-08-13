@@ -40,11 +40,11 @@
             <name>Maven Central</name>
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
-        <repository>
+        <!--repository>
             <id>lavalink</id>
             <name>LavaLink Release</name>
             <url>https://maven.lavalink.dev/releases</url>
-        </repository>
+        </repository-->
              <repository>
                  <id>youtube-source-mvn-repo</id>
                  <url>https://raw.github.com/lavalink-devs/youtube-source/mvn-repo/</url>
