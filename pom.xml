@@ -45,6 +45,14 @@
             <name>LavaLink Release</name>
             <url>https://maven.lavalink.dev/releases</url>
         </repository>
+             <repository>
+                 <id>youtube-source-mvn-repo</id>
+                 <url>https://raw.github.com/lavalink-devs/youtube-source/mvn-repo/</url>
+                 <snapshots>
+                     <enabled>true</enabled>
+                     <updatePolicy>always</updatePolicy>
+                 </snapshots>
+             </repository>
     </repositories>
 
     <dependencies>
