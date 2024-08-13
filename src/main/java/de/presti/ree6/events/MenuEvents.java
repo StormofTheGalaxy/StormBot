@@ -51,6 +51,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -106,6 +110,13 @@ public class MenuEvents extends ListenerAdapter {
         }
 
         switch (event.getComponentId()) {
+            case "training" -> {
+                Modal.Builder builder = Modal.create("training_modal", "Запрос тренировки");
+                builder.addActionRow(TextInput.create("datetime", "Дата и время", TextInputStyle.SHORT).setRequired(true).setPlaceholder("22.06 15:00").setMinLength(11).setMaxLength(11).build());
+                builder.addActionRow(TextInput.create("addon", "Дополнительная информация", TextInputStyle.PARAGRAPH).setRequired(false).setMaxLength(2042).setMinLength(16).build());
+                event.replyModal(builder.build()).queue();
+            }
+
             case "re_feedback" -> {
                 Modal.Builder builder = Modal.create("re_feedback_modal", LanguageService.getByGuild(event.getGuild(), "label.feedback"));
                 builder.addActionRow(TextInput.create("re_feedback_text", LanguageService.getByGuild(event.getGuild(), "label.feedback"), TextInputStyle.PARAGRAPH).setRequired(true).setMaxLength(2042).setMinLength(16).build());
@@ -401,6 +412,29 @@ public class MenuEvents extends ListenerAdapter {
 
                 Main.getInstance().getCommandManager().sendMessage(embedBuilder, BotWorker.getShardManager().getTextChannelById(BotConfig.getFeedbackChannel()));
                 Main.getInstance().getCommandManager().sendMessage("Thank you!", null, event.getInteraction().getHook());
+            }
+
+            case "training_modal" -> {
+                event.deferReply(true).queue();
+
+                String message = "@trainers\n Новая заявка на обучение от "+event.getUser().getName()+" ("+event.getUser().getId()+")\n" +
+                        "|Время| Доп. Информация|\n" +
+                        "|--- | --- |\n" +
+                        "|"+event.getValue("datetime").getAsString()+"|"+event.getValue("addon").getAsString()+"|";
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://holonet.stormgalaxy.com/posts.json"))
+                        .POST(HttpRequest.BodyPublishers.ofString("{\"raw\":\""+message+"\",\"topic_id\":\"516\"}"))
+                        .header("Api-Key", Main.getInstance().getConfig().getConfiguration().getString("bot.tokens.holonet", ""))
+                        .header("Api-Username", "stormbot")
+                        .header("Content-Type", "application/json")
+                        .build();
+                HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                        .thenApply(HttpResponse::body)
+                        .thenAccept(System.out::println)
+                        .join();
+
+                Main.getInstance().getCommandManager().sendMessage("Уведомление отправлено!", null, event.getInteraction().getHook());
             }
 
             case "re_suggestion_modal" -> {
