@@ -33,9 +33,9 @@ public class Instructors implements ICommand {
         if (!commandEvent.isSlashCommand()){
             commandEvent.reply(commandEvent.getResource("command.perform.onlySlashSupported")); return;
         }
-        if (commandEvent.getGuild().getOwnerIdLong() != 996141113847074826L) {
-            commandEvent.reply("Разрешено только в официальном сервере SoG"); return;
-        }
+        //if (commandEvent.getGuild().getOwnerIdLong() != 996141113847074826L) {
+         //   commandEvent.reply("Разрешено только в официальном сервере SoG"); return;
+        //}
 
         if ((commandEvent.getMember().hasPermission(Permission.ADMINISTRATOR) && commandEvent.getMember().hasPermission(Permission.MANAGE_SERVER)) || commandEvent.getUser().getId().equals("434280207847784449")) {
 
