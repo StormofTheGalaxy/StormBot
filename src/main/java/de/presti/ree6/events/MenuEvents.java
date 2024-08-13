@@ -431,7 +431,6 @@ public class MenuEvents extends ListenerAdapter {
                         .build();
                 HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenApply(HttpResponse::body)
-                        .thenAccept(System.out::println)
                         .join();
 
                 Main.getInstance().getCommandManager().sendMessage("Уведомление отправлено!", null, event.getInteraction().getHook());
