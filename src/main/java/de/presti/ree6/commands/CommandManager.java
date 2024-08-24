@@ -481,7 +481,7 @@ public class CommandManager {
         String[] argumentsParsed = Arrays.copyOfRange(arguments, 1, arguments.length);
 
         // Perform the Command.
-        command.onASyncPerform(new CommandEvent(command.getClass().getAnnotation(Command.class).name(), member, guild, message, textChannel, argumentsParsed, null));
+        command.onASyncPerform(new CommandEvent(command.getClass().getAnnotation(Command.class).name(), member, guild, message, textChannel, argumentsParsed, null, true));
 
         return true;
     }
@@ -513,8 +513,13 @@ public class CommandManager {
             }
         }
 
+        boolean ephemeral = true;
+        if (slashCommandInteractionEvent.getName().equals("mute")) {
+            ephemeral = false;
+        }
+
         // Perform the Command.
-        command.onASyncPerform(new CommandEvent(command.getClass().getAnnotation(Command.class).name(), slashCommandInteractionEvent.getMember(), slashCommandInteractionEvent.getGuild(), null, messageChannel, null, slashCommandInteractionEvent));
+        command.onASyncPerform(new CommandEvent(command.getClass().getAnnotation(Command.class).name(), slashCommandInteractionEvent.getMember(), slashCommandInteractionEvent.getGuild(), null, messageChannel, null, slashCommandInteractionEvent, ephemeral));
 
         return true;
     }

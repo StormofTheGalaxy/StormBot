@@ -65,6 +65,9 @@ public class CommandEvent {
     @Nullable
     SlashCommandInteractionEvent slashCommandInteractionEvent;
 
+    @Nonnull
+    boolean ephemeral;
+
     /**
      * Constructor used to save the Data.
      *
@@ -75,8 +78,9 @@ public class CommandEvent {
      * @param textChannel                  the {@link TextChannel} Entity.
      * @param arguments                    the given Arguments.
      * @param slashCommandInteractionEvent the {@link SlashCommandInteractionEvent} Entity.
+     * @param ephemeral the {@link Boolean} Entity.
      */
-    public CommandEvent(String command, @Nonnull Member member, @Nonnull Guild guild, @Nullable Message message, @Nonnull GuildMessageChannelUnion textChannel, @Nullable String[] arguments, @Nullable SlashCommandInteractionEvent slashCommandInteractionEvent) {
+    public CommandEvent(String command, @Nonnull Member member, @Nonnull Guild guild, @Nullable Message message, @Nonnull GuildMessageChannelUnion textChannel, @Nullable String[] arguments, @Nullable SlashCommandInteractionEvent slashCommandInteractionEvent, @Nonnull boolean ephemeral) {
         this.command = command;
         this.member = member;
         this.guild = guild;
@@ -84,6 +88,7 @@ public class CommandEvent {
         this.channel = textChannel;
         this.arguments = arguments;
         this.slashCommandInteractionEvent = slashCommandInteractionEvent;
+        this.ephemeral = ephemeral;
     }
 
     /**
@@ -335,7 +340,7 @@ public class CommandEvent {
      * @return the {@link InteractionHook} Entity.
      */
     public InteractionHook getInteractionHook() {
-        if (isSlashCommand()) return getSlashCommandInteractionEvent().getHook().setEphemeral(true);
+        if (isSlashCommand()) return getSlashCommandInteractionEvent().getHook().setEphemeral(ephemeral);
 
         return null;
     }
