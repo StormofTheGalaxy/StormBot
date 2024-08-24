@@ -33,6 +33,7 @@ public class Mute implements ICommand {
             commandEvent.reply(commandEvent.getResource("message.default.needPermission", Permission.MODERATE_MEMBERS.name()), 5);
             return;
         }
+        commandEvent.setEphemeral(false);
 
         if (commandEvent.getMember().hasPermission(Permission.MODERATE_MEMBERS)) {
 
