@@ -154,6 +154,7 @@ public class Report implements ICommand {
         punishmentsLog.setModerId(moder.getIdLong());
         punishmentsLog.setAction((int) punishment);
         SQLSession.getSqlConnector().getSqlWorker().updateEntity(punishmentsLog);
+        commandEvent.setEphemeral(false);
 
         commandEvent.reply("Ваш отчёт успешно записан!", 5);
     }
